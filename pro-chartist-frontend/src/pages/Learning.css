@@ -22,7 +22,7 @@
 }
 
 .course-card {
-  background: var(--glass-bg);
+  background: #d2e6ff;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 6px var(--shadow-color);
@@ -56,10 +56,10 @@
 
 .discount-badge {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: linear-gradient(135deg, var(--success-color) 0%, var(--success-color-dark) 100%);
-  color: white;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: linear-gradient(135deg, silver 0%, white  100%);
+  color: black;
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-weight: 500;

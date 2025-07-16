@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiChevronDown } from 'react-icons/fi';
 import './Home.css';
@@ -70,6 +70,16 @@ function Home() {
     }
   ]);
   const [playingVideoId, setPlayingVideoId] = useState(null);
+  const [showOverlayDialog, setShowOverlayDialog] = useState(false);
+  const [pendingBotUrl, setPendingBotUrl] = useState(null);
+
+  // Bot URLs for redirection
+  const botUrls = {
+    'price-line': 'https://www.tradingview.com/script/d5EIJrAY-Sniper-Entry-Setup/',
+    'stock-swing': 'https://www.tradingview.com/script/i3YZzMnQ-Smart-Money-Concepts/',
+    'smc': 'https://www.tradingview.com/script/i3YZzMnQ-Smart-Money-Concepts/',
+    'liquidity': 'https://www.tradingview.com/script/i3YZzMnQ-Smart-Money-Concepts/'
+  };
 
   useEffect(() => {
     // Load saved videos from backend API
@@ -264,13 +274,101 @@ function Home() {
       </section>
 
       {/* Bot Image Container */}
-      <div className="bot-image-container">
-        <div style={{ width: '100%', height: '400px' }}>
-          {selectedBot === 'price-line' && <TradingViewWidget />}
-          {selectedBot === 'stock-swing' && <TradingViewWidget2 />}
-          {selectedBot === 'smc' && <TradingViewWidget3 />}
-          {selectedBot === 'liquidity' && <TradingViewWidget4 />}
+      <div className="bot-image-container" style={{ position: 'relative' }}>
+        <div style={{ width: '100%', height: '400px', position: 'relative' }}>
+          {/* Overlay Division */}
+          <div
+            className="bot-overlay"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: 'rgba(0,0,0,0.05)',
+              zIndex: 2,
+              cursor: 'pointer',
+            }}
+            onClick={() => {
+              setPendingBotUrl(botUrls[selectedBot]);
+              setShowOverlayDialog(true);
+            }}
+          ></div>
+          {/* Chart Widget */}
+          <div style={{ width: '100%', height: '100%', position: 'relative', zIndex: 1 }}>
+            {selectedBot === 'price-line' && <TradingViewWidget />}
+            {selectedBot === 'stock-swing' && <TradingViewWidget2 />}
+            {selectedBot === 'smc' && <TradingViewWidget3 />}
+            {selectedBot === 'liquidity' && <TradingViewWidget4 />}
+          </div>
         </div>
+        {/* Popup Dialog */}
+        {showOverlayDialog && (
+          <div
+            className="bot-popup-dialog"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: 'rgba(0,0,0,0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10,
+            }}
+            onClick={() => setShowOverlayDialog(false)}
+          >
+            <div
+              style={{
+                background: '#fff',
+                borderRadius: '12px',
+                padding: '2rem',
+                minWidth: '300px',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+                textAlign: 'center',
+                position: 'relative',
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <h2 style={{ marginBottom: '1.5rem' }}>Open Bot chart</h2>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
+                <button
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    background: 'linear-gradient(135deg, #2563eb 0%, #60a5fa 100%)',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    window.open(pendingBotUrl, '_blank');
+                    setShowOverlayDialog(false);
+                  }}
+                >
+                  Agree
+                </button>
+                <button
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    background: '#e5e7eb',
+                    color: '#111827',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setShowOverlayDialog(false)}
+                >
+                  Back
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Stock Ticker */}
@@ -278,10 +376,10 @@ function Home() {
 
       {/* Videos Section */}
       <section className="videos-section">
-        <div>
-        <div>📹</div>
-        <h2> Tutorial Videos</h2>
-        </div>
+      <div className="tutorial-videos-header">
+       {/* <div className="tutorial-icon">📹</div> */}
+       <h2>Tutorial Videos</h2>
+      </div>
         <div className="video-grid">
           {videos.map((video) => (
             <motion.div

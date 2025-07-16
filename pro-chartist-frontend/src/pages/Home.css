@@ -49,6 +49,7 @@
   background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
   color: white;
   box-shadow: 0 4px 6px rgba(var(--accent-color-rgb), 0.2);
+  border: 2px solid white;
 }
 
 /* Bot Image Container */
@@ -196,6 +197,21 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+.tutorial-videos-header {
+  display: flex;
+  flex-direction: column; /* or 'row' for side by side */
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.tutorial-icon {
+  font-size: 2rem;
+}
+
+
 
 .video-grid {
   display: grid;
@@ -475,6 +491,64 @@
 .faq-answer.open {
   max-height: 500px;
   padding: 0 1.5rem 1.5rem;
+}
+
+/* Overlay for Bot Chart */
+.bot-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.05);
+  z-index: 2;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.bot-overlay:hover {
+  background: rgba(0,0,0,0.10);
+}
+
+/* Popup Dialog for Bot Chart */
+.bot-popup-dialog {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.bot-popup-dialog > div {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  min-width: 300px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  text-align: center;
+  position: relative;
+}
+.bot-popup-dialog button {
+  padding: 0.75rem 1.5rem;
+  margin: 0 0.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s, color 0.2s;
+}
+.bot-popup-dialog button:first-child {
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+  color: black;
+}
+.bot-popup-dialog button:last-child {
+  background: #e5e7eb;
+  color: #111827;
 }
 
 /* Responsive Design */
