@@ -1,0 +1,119 @@
+:root {
+  /* Light Mode */
+  --bg-primary: #eff6ff; /* Ice white */
+  --bg-secondary: #dbeafe; /* Soft sky blue */
+  --text-primary: #0f172a; /* Deep navy */
+  --text-secondary: #475569; /* Cool gray */
+  --accent-color: #0284c7; /* Glacier blue */
+  --accent-light: #38bdf8; /* Sky blue */
+  --border-color: #bfdbfe; /* Light gray-blue */
+  --shadow-color: rgba(2, 132, 199, 0.1); /* Blue shadow */
+  --card-bg: #ffffff; /* Pure white */
+  --hover-bg: #e0f2fe; /* Frosted light blue */
+  --chart-grid: #cbd5e1; /* Light gray */
+  --success-color: #10b981; /* Emerald green */
+  --danger-color: #d72638; /* Bright red */
+  --primary-blue: #0ea5e9; /* Aqua blue */
+}
+
+.dark {
+  /* Dark Mode */
+  --bg-primary: #0a0f14; /* Midnight blue */
+  --bg-secondary: #121926; /* Deep navy */
+  --text-primary: #eaeaea; /* Soft white */
+  --text-secondary: #9ca3af; /* Muted gray */
+  --accent-color: #00b4d8; /* Electric cyan */
+  --accent-light: #48cae4; /* Soft neon teal */
+  --border-color: #1f2a37; /* Dark blue */
+  --shadow-color: rgba(0, 238, 255, 0.2); /* Cyan glow */
+  --card-bg: #1e293b; /* Midnight blue */
+  --hover-bg: #243c5a; /* Deep navy */
+  --chart-grid: #4b5563; /* Muted gray */
+  --success-color: #34d399; /* Soft green */
+  --danger-color: #f87171; /* Soft red */
+  --primary-blue: #3b82f6; /* Bright blue */
+}
+
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  line-height: 1.5;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Utility classes */
+.container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 1440px) {
+  .container {
+    max-width: 1200px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .container {
+    max-width: 992px;
+  }
+}
+
+@media (max-width: 992px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    max-width: 576px;
+  }
+}
+
+@media (max-width: 576px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+}

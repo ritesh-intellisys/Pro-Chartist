@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&family=Poppins:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-300 ease-in-out;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary/90 hover:shadow-lg;
+  }
+
+  .btn-secondary {
+    @apply border-2 border-primary text-primary hover:bg-primary/10;
+  }
+
+  .card {
+    @apply bg-white dark:bg-dark-card rounded-xl shadow-lg border border-light-border dark:border-dark-border transition-all duration-300;
+  }
+
+  .input {
+    @apply w-full px-4 py-2 rounded-lg border border-light-border dark:border-dark-border bg-light-primary dark:bg-dark-primary text-light-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary/50;
+  }
+}
+
+.glass {
+  @apply backdrop-blur-md bg-white/10 dark:bg-black/10;
+}
+
+.financial-data {
+  @apply font-mono tabular-nums;
+}

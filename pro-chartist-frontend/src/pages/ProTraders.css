@@ -1,0 +1,395 @@
+.pro-traders-page {
+  padding: 2rem;
+  min-height: calc(100vh - 64px);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  color: var(--text-primary);
+}
+
+.page-title {
+  text-align: center;
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.traders-content {
+  display: flex;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto 3rem;
+}
+
+.leagues-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.league-block {
+  background: var(--glass-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+}
+
+.league-date {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.league-table {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+
+th, td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+th {
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+  color: white;
+  font-weight: 500;
+}
+
+.rank-col {
+  width: 80px;
+}
+
+.name-col {
+  min-width: 150px;
+}
+
+.trades-col {
+  width: 100px;
+}
+
+.roi-col {
+  width: 100px;
+  text-align: right;
+}
+
+.top-trader {
+  background: rgba(var(--accent-color-rgb), 0.1);
+  font-weight: 600;
+}
+
+.roi {
+  color: var(--success-color);
+  font-weight: 500;
+}
+
+.previous-winners {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.winner-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.winner-date {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.winner-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.winner-roi {
+  color: var(--success-color);
+  font-weight: 500;
+}
+
+.top-traders-photos {
+  width: 300px;
+  background: var(--glass-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+}
+
+.top-traders-photos h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.traders-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.trader-photo-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition: transform 0.3s ease;
+}
+
+.trader-photo-card:hover {
+  transform: translateX(4px);
+  background: var(--hover-bg);
+}
+
+.trader-photo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent-color);
+}
+
+.trader-name {
+  flex: 1;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.trader-rank {
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.league-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.next-league, .rules {
+  background: var(--glass-bg);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  transition: transform 0.3s ease;
+}
+
+.next-league:hover, .rules:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px var(--shadow-color);
+}
+
+.next-league h2, .rules h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dates {
+  margin-bottom: 2rem;
+}
+
+.dates p {
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.application-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.form-group input {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  border-color: var(--accent-color);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.1);
+}
+
+.form-group input.error {
+  border-color: var(--danger-color);
+}
+
+.error-message {
+  color: var(--danger-color);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.join-btn {
+  padding: 0.75rem;
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.join-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.join-btn:hover::before {
+  width: 300%;
+  height: 300%;
+}
+
+.join-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(var(--accent-color-rgb), 0.2);
+}
+
+.join-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.rules ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rules li {
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+  position: relative;
+  color: var(--text-secondary);
+}
+
+.rules li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--accent-color);
+}
+
+@media (max-width: 1200px) {
+  .traders-content {
+    flex-direction: column;
+  }
+
+  .top-traders-photos {
+    width: 100%;
+  }
+
+  .traders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .league-info {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .pro-traders-page {
+    padding: 1rem;
+  }
+
+  .page-title {
+    font-size: 2rem;
+  }
+
+  .league-block {
+    padding: 1rem;
+  }
+
+  th, td {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .traders-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.75rem;
+  }
+
+  .league-date {
+    font-size: 1.1rem;
+  }
+
+  .traders-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .next-league, .rules {
+    padding: 1.5rem;
+  }
+
+  .next-league h2, .rules h2 {
+    font-size: 1.25rem;
+  }
+}
