@@ -22,7 +22,7 @@
 }
 
 .course-card {
-  background: #d2e6ff;
+  background: var(--glass-bg);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 6px var(--shadow-color);

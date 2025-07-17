@@ -194,7 +194,7 @@ th {
 }
 
 .next-league, .rules {
-  background: #d2e6ff;
+  background: var(--glass-bg);
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px var(--shadow-color);
