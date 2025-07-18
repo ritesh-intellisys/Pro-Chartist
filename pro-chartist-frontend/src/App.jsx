@@ -13,6 +13,7 @@ import AdminLogin from './pages/AdminLogin';
 import ResetPassword from './pages/ResetPassword';
 import AdminResetPassword from './pages/AdminResetPassword';
 import './App.css';
+import ScrollToTop from './components/ScrollToTop';
 
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className={`app ${theme}`}>
         <Header 
           theme={theme} 

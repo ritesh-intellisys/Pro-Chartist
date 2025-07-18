@@ -20,7 +20,7 @@
 .h2{
   text-align: center;
   font-size: x-large;
-  font-family:sans-serif;
+  /* font-family:sans-serif; */
 }
 
 .h2 p{
@@ -59,6 +59,24 @@
   border-radius: 12px;
   box-shadow: 0 4px 6px var(--shadow-color);
   overflow-x: auto;
+}
+
+.flex-row-admin-panel {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.league-management {
+  width: 40%;
+  box-sizing: border-box;
+}
+
+.update-traders {
+  width: 60%;
+  box-sizing: border-box;
 }
 
 
@@ -338,6 +356,17 @@ tr:hover {
   font-weight: 500;
   text-align: center;
   display: block;
+}
+
+@media (max-width: 900px) {
+  .flex-row-admin-panel {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .league-management,
+  .update-traders {
+    width: 100%;
+  }
 }
 
 @media (max-width: 768px) {

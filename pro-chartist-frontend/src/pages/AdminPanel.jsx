@@ -3,6 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import './AdminPanel.css';
 
+// Confirmation Modal Component
+function ConfirmModal({ open, message, onConfirm, onCancel }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 min-w-[300px] max-w-xs">
+        <div className="mb-4 text-gray-900 dark:text-gray-100">{message}</div>
+        <div className="flex justify-end gap-2">
+          <button className="update-btn bg-gray-400 hover:bg-gray-500 text-white" onClick={onCancel}>Cancel</button>
+          <button className="update-btn" onClick={onConfirm}>Confirm</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AdminPanel({ leagueData, setLeagueData, applications, setApplications }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [acceptedApplications, setAcceptedApplications] = useState([]);
@@ -44,6 +60,15 @@ function AdminPanel({ leagueData, setLeagueData, applications, setApplications }
   const [editingVideoId, setEditingVideoId] = useState(null); // NEW: track which video is being edited
   const navigate = useNavigate();
 
+  // Confirmation modal state
+  const [confirm, setConfirm] = useState({ open: false, message: '', onConfirm: null });
+
+  // Helper to open confirmation modal
+  const askConfirm = (message, onConfirm) => {
+    setConfirm({ open: true, message, onConfirm });
+  };
+  const closeConfirm = () => setConfirm({ open: false, message: '', onConfirm: null });
+
   // Prevent background scroll when modal is open
   useEffect(() => {
     if (editingVideoId) {
@@ -76,11 +101,19 @@ function AdminPanel({ leagueData, setLeagueData, applications, setApplications }
     const fetchLeagueData = async () => {
       try {
         const res = await fetch('http://localhost:5002/api/league');
-const data = await res.json();
+        const data = await res.json();
 
         if (data) {
           setLeagueData(data);
-          setModifiedTraders(data.currentLeague.traders);
+          // Fallback: if traders is empty or malformed, initialize with 3 blank traders
+          let traders = Array.isArray(data.currentLeague.traders) && data.currentLeague.traders.length >= 3
+            ? data.currentLeague.traders
+            : [
+                { rank: 1, name: '', trades: 0, roi: 0 },
+                { rank: 2, name: '', trades: 0, roi: 0 },
+                { rank: 3, name: '', trades: 0, roi: 0 }
+              ];
+          setModifiedTraders(traders);
           localStorage.setItem('leagueData', JSON.stringify(data));
         }
       } catch (err) {
@@ -256,34 +289,46 @@ const data = await res.json();
   };
 
   const handleApplicationStatus = async (application, newStatus) => {
-    try {
-      const appId = application._id || application.id;
-      const res = await fetch(`http://localhost:5002/api/applicationsByDate/${appId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
+    let actionMsg = '';
+    if (newStatus === 'approved') actionMsg = 'approve this application';
+    else if (newStatus === 'rejected') actionMsg = 'reject this application';
+    else actionMsg = 'revert this application to pending';
+    askConfirm(`Are you sure you want to ${actionMsg}?`, async () => {
+      closeConfirm();
+      try {
+        const appId = application._id || application.id;
+        const res = await fetch(`http://localhost:5002/api/applicationsByDate/${appId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus }),
+        });
 
-      if (!res.ok) throw new Error('Failed to update application');
+        if (!res.ok) throw new Error('Failed to update application');
 
-      const updatedApp = await res.json();
+        const updatedApp = await res.json();
 
-      setApplications(prev => prev.filter(app => app._id !== appId));
-      setAcceptedApplications(prev => prev.filter(app => app._id !== appId));
-      setRejectedApplications(prev => prev.filter(app => app._id !== appId));
+        setApplications(prev => prev.filter(app => app._id !== appId));
+        setAcceptedApplications(prev => prev.filter(app => app._id !== appId));
+        setRejectedApplications(prev => prev.filter(app => app._id !== appId));
 
-      if (newStatus === 'approved') setAcceptedApplications(prev => [...prev, updatedApp]);
-      else if (newStatus === 'rejected') setRejectedApplications(prev => [...prev, updatedApp]);
-      else setApplications(prev => [...prev, updatedApp]);
+        if (newStatus === 'approved') setAcceptedApplications(prev => [...prev, updatedApp]);
+        else if (newStatus === 'rejected') setRejectedApplications(prev => [...prev, updatedApp]);
+        else setApplications(prev => [...prev, updatedApp]);
 
-      toast.success(`Application marked as ${newStatus}`);
-    } catch (err) {
-      console.error('Update status failed:', err);
-      toast.error('Failed to update application status');
-    }
+        toast.success(`Application marked as ${newStatus}`);
+      } catch (err) {
+        console.error('Update status failed:', err);
+        toast.error('Failed to update application status');
+      }
+    });
   };
 
-  const handleLogout = () => navigate('/admin/login');
+  const handleLogout = () => {
+    askConfirm('Are you sure you want to logout?', () => {
+      closeConfirm();
+      navigate('/admin/login');
+    });
+  };
 
   // Get today's date in yyyy-mm-dd format
   const todayStr = new Date().toISOString().split('T')[0];
@@ -297,22 +342,25 @@ const data = await res.json();
       toast.error('Please select today or a future date for league dates.');
       return;
     }
-    try {
-      const res = await fetch('http://localhost:5002/api/league', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ currentLeague: leagueData.currentLeague }),
-      });
-      if (!res.ok) throw new Error('Failed to save league data');
-      const updated = await res.json();
-      setLeagueData(updated);
-      setModifiedTraders(updated.currentLeague.traders);
-      localStorage.setItem('leagueData', JSON.stringify(updated));
-      toast.success('League data saved!');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to save league data');
-    }
+    askConfirm('Are you sure you want to update league dates?', async () => {
+      closeConfirm();
+      try {
+        const res = await fetch('http://localhost:5002/api/league', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentLeague: leagueData.currentLeague }),
+        });
+        if (!res.ok) throw new Error('Failed to save league data');
+        const updated = await res.json();
+        setLeagueData(updated);
+        setModifiedTraders(updated.currentLeague.traders);
+        localStorage.setItem('leagueData', JSON.stringify(updated));
+        toast.success('League data saved!');
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to save league data');
+      }
+    });
   };
   
 
@@ -325,32 +373,35 @@ const data = await res.json();
   };
 
   const handleSubmitTraders = async () => {
-    const updatedLeague = {
-      ...leagueData,
-      currentLeague: {
-        ...leagueData.currentLeague,
-        traders: modifiedTraders.slice(0, 3),
-      },
-    };
+    askConfirm('Are you sure you want to update top traders?', async () => {
+      closeConfirm();
+      const updatedLeague = {
+        ...leagueData,
+        currentLeague: {
+          ...leagueData.currentLeague,
+          traders: modifiedTraders.slice(0, 3),
+        },
+      };
 
-    try {
-      const res = await fetch('http://localhost:5002/api/league', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ currentLeague: updatedLeague.currentLeague }),
-      });
+      try {
+        const res = await fetch('http://localhost:5002/api/league', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentLeague: updatedLeague.currentLeague }),
+        });
 
-      if (!res.ok) throw new Error('Failed to save trader data');
+        if (!res.ok) throw new Error('Failed to save trader data');
 
-      const updated = await res.json();
-      setLeagueData(updated);
-      setModifiedTraders(updated.currentLeague.traders);
-      localStorage.setItem("leagueData", JSON.stringify(updated));
-      toast.success('Top traders updated successfully!');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to update traders');
-    }
+        const updated = await res.json();
+        setLeagueData(updated);
+        setModifiedTraders(updated.currentLeague.traders);
+        localStorage.setItem("leagueData", JSON.stringify(updated));
+        toast.success('Top traders updated successfully!');
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to update traders');
+      }
+    });
   };
 
   const openImageModal = (imageUrl) => setSelectedImage(imageUrl);
@@ -370,55 +421,78 @@ const data = await res.json();
       </div>
 
       <div className="admin-content">
-        <div className="league-management">
-          <h2 className="text-2xl font-bold mb-4">League Management</h2>
-          <form onSubmit={updateLeagueData}>
-            <div className="form-group">
-              <label className="font-medium mb-1 block">Current League Start Date</label>
-              <input
-                type="date"
-                min={todayStr}
-                value={leagueData.currentLeague.startDate}
-                onChange={(e) => setLeagueData({
-                  ...leagueData,
-                  currentLeague: {
-                    ...leagueData.currentLeague,
-                    startDate: e.target.value,
-                  },
-                })}
-              />
-            </div>
-            <div className="form-group">
-              <label className="font-medium mb-1 block">Next League Start Date</label>
-              <input
-                type="date"
-                min={todayStr}
-                value={leagueData.currentLeague.nextLeagueStart}
-                onChange={(e) => setLeagueData({
-                  ...leagueData,
-                  currentLeague: {
-                    ...leagueData.currentLeague,
-                    nextLeagueStart: e.target.value,
-                  },
-                })}
-              />
-            </div>
-            <div className="form-group">
-              <label className="font-medium mb-1 block">Current Participants</label>
-              <input
-                type="number"
-                value={leagueData.currentLeague.participants}
-                onChange={(e) => setLeagueData({
-                  ...leagueData,
-                  currentLeague: {
-                    ...leagueData.currentLeague,
-                    participants: parseInt(e.target.value),
-                  },
-                })}
-              />
-            </div>
-            <button type="submit" className="update-btn">Update League Dates</button>
-          </form>
+        {/* Flex row for League Management and Update Top Traders */}
+        <div className="flex-row-admin-panel">
+          <div className="league-management">
+            <h2 className="text-2xl font-bold mb-4">League Management</h2>
+            <form onSubmit={updateLeagueData}>
+              <div className="form-group">
+                <label className="font-medium mb-1 block">Current League Start Date</label>
+                <input
+                  type="date"
+                  min={todayStr}
+                  value={leagueData.currentLeague.startDate}
+                  onChange={(e) => setLeagueData({
+                    ...leagueData,
+                    currentLeague: {
+                      ...leagueData.currentLeague,
+                      startDate: e.target.value,
+                    },
+                  })}
+                />
+              </div>
+              <div className="form-group">
+                <label className="font-medium mb-1 block">Next League Start Date</label>
+                <input
+                  type="date"
+                  min={todayStr}
+                  value={leagueData.currentLeague.nextLeagueStart}
+                  onChange={(e) => setLeagueData({
+                    ...leagueData,
+                    currentLeague: {
+                      ...leagueData.currentLeague,
+                      nextLeagueStart: e.target.value,
+                    },
+                  })}
+                />
+              </div>
+              <div className="form-group">
+                <label className="font-medium mb-1 block">Current Participants</label>
+                <input
+                  type="number"
+                  value={leagueData.currentLeague.participants}
+                  onChange={(e) => setLeagueData({
+                    ...leagueData,
+                    currentLeague: {
+                      ...leagueData.currentLeague,
+                      participants: parseInt(e.target.value),
+                    },
+                  })}
+                />
+              </div>
+              <button type="submit" className="update-btn">Update League Dates</button>
+            </form>
+          </div>
+
+          <div className="update-traders">
+            <h2 className="text-xl font-bold mb-4">Update Top Traders</h2>
+            <table>
+              <thead>
+                <tr><th>Rank</th><th>Name</th><th>Trades</th><th>ROI</th></tr>
+              </thead>
+              <tbody className='traders-table-modified'>
+                {modifiedTraders.slice(0, 3).map((trader) => (
+                  <tr key={trader.rank}>
+                    <td>{trader.rank}</td>
+                    <td><input type="text" value={trader.name || ''} onChange={(e) => handleUpdateTrader(trader.rank, 'name', e.target.value)} /></td>
+                    <td><input type="number" value={trader.trades ?? 0} onChange={(e) => handleUpdateTrader(trader.rank, 'trades', parseInt(e.target.value))} /></td>
+                    <td><input type="number" value={trader.roi ?? 0} onChange={(e) => handleUpdateTrader(trader.rank, 'roi', parseFloat(e.target.value))} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button onClick={handleSubmitTraders} className="update-btn">Update Top Traders</button>
+          </div>
         </div>
 
         <div className="video-management relative">
@@ -613,7 +687,7 @@ const data = await res.json();
           <h2 className="text-xl font-bold mb-4 h2">
             {applicationFilter.charAt(0).toUpperCase() + applicationFilter.slice(1)} Applications
             {applicationFilter === 'pending' && (
-              <span className="font-semibold"> of {leagueData.currentLeague.nextLeagueStart} league</span>
+              <span className="text-xl font-bold"> of {leagueData.currentLeague.nextLeagueStart} league</span>
             )}
           </h2>
           <div className="overflow-x-auto">
@@ -632,68 +706,57 @@ const data = await res.json();
                 applicationFilter === 'accepted' ? 'accepted-applications-body' :
                 'rejected-applications-body'
               }>
-                {filteredApplications.map((app, index) => (
-                  <tr key={app._id || index}>
-                    <td>{app.name}</td>
-                    <td>{app.mobile}</td>
-                    <td>
-                      {app.imageUrl && (
-                        <img
-                          src={`http://localhost:5002/${app.imageUrl}`}
-                          alt="Trading Screenshot"
-                          width="50"
-                          onClick={() => openImageModal(`http://localhost:5002/${app.imageUrl}`)}
-                          style={{ cursor: 'pointer' }}
-                        />
-                      )}
-                    </td>
-                    {applicationFilter === 'pending' && <td>Pending</td>}
-                    <td>
-                      {applicationFilter === 'pending' && (
-                        <>
-                          <button onClick={() => handleApplicationStatus(app, 'approved')} className="action-btn approve">Approve</button>
-                          <button onClick={() => handleApplicationStatus(app, 'rejected')} className="action-btn reject">Reject</button>
-                        </>
-                      )}
-                      {applicationFilter === 'accepted' && (
-                        <>
-                          <button onClick={() => handleApplicationStatus(app, 'rejected')} className="action-btn reject">Reject</button>
-                          <button onClick={() => handleApplicationStatus(app, 'pending')} className="action-btn revert">Revert to Pending</button>
-                        </>
-                      )}
-                      {applicationFilter === 'rejected' && (
-                        <>
-                          <button onClick={() => handleApplicationStatus(app, 'approved')} className="action-btn approve">Approve</button>
-                          <button onClick={() => handleApplicationStatus(app, 'pending')} className="action-btn revert">Revert to Pending</button>
-                        </>
-                      )}
+                {filteredApplications.length === 0 ? (
+                  <tr>
+                    <td colSpan={applicationFilter === 'pending' ? 5 : 4} style={{ textAlign: 'center', fontStyle: 'italic', color: '#888' }}>
+                      No applications
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredApplications.map((app, index) => (
+                    <tr key={app._id || index}>
+                      <td>{app.name}</td>
+                      <td>{app.mobile}</td>
+                      <td>
+                        {app.imageUrl && (
+                          <img
+                            src={`http://localhost:5002/${app.imageUrl}`}
+                            alt="Trading Screenshot"
+                            width="50"
+                            onClick={() => openImageModal(`http://localhost:5002/${app.imageUrl}`)}
+                            style={{ cursor: 'pointer' }}
+                          />
+                        )}
+                      </td>
+                      {applicationFilter === 'pending' && <td>Pending</td>}
+                      <td>
+                        {applicationFilter === 'pending' && (
+                          <>
+                            <button onClick={() => handleApplicationStatus(app, 'approved')} className="action-btn approve">Approve</button>
+                            <button onClick={() => handleApplicationStatus(app, 'rejected')} className="action-btn reject">Reject</button>
+                          </>
+                        )}
+                        {applicationFilter === 'accepted' && (
+                          <>
+                            <button onClick={() => handleApplicationStatus(app, 'rejected')} className="action-btn reject">Reject</button>
+                            <button onClick={() => handleApplicationStatus(app, 'pending')} className="action-btn revert">Revert to Pending</button>
+                          </>
+                        )}
+                        {applicationFilter === 'rejected' && (
+                          <>
+                            <button onClick={() => handleApplicationStatus(app, 'approved')} className="action-btn approve">Approve</button>
+                            <button onClick={() => handleApplicationStatus(app, 'pending')} className="action-btn revert">Revert to Pending</button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
 
-        <div className="update-traders">
-  <h2 className="text-xl font-bold mb-4">Update Top Traders</h2>
-  <table>
-    <thead>
-      <tr><th>Rank</th><th>Name</th><th>Trades</th><th>ROI</th></tr>
-    </thead>
-    <tbody className='traders-table-modified'>
-      {modifiedTraders.slice(0, 3).map((trader) => (
-        <tr key={trader.rank}>
-          <td>{trader.rank}</td>
-          <td><input type="text" value={trader.name} onChange={(e) => handleUpdateTrader(trader.rank, 'name', e.target.value)} /></td>
-          <td><input type="number" value={trader.trades} onChange={(e) => handleUpdateTrader(trader.rank, 'trades', parseInt(e.target.value))} /></td>
-          <td><input type="number" value={trader.roi} onChange={(e) => handleUpdateTrader(trader.rank, 'roi', parseFloat(e.target.value))} /></td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-  <button onClick={handleSubmitTraders} className="update-btn">Update Top Traders</button>
-</div>
       </div>
 
       {selectedImage && (
@@ -704,6 +767,13 @@ const data = await res.json();
           </div>
         </div>
       )}
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        open={confirm.open}
+        message={confirm.message}
+        onConfirm={confirm.onConfirm}
+        onCancel={closeConfirm}
+      />
     </div>
   );
 }

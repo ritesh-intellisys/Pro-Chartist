@@ -86,7 +86,7 @@ function ProTraders({ leagueData, setLeagueData, applications, setApplications }
           {/* ✅ Current League */}
           <div className="league-block">
             <h2 className="league-date">
-              Current League ({leagueData?.currentLeague?.startDate || '...'})
+              Previous League Winners <br/>({leagueData?.currentLeague?.startDate || '...'})
             </h2>
             <div className="league-table">
               <table>
@@ -118,58 +118,25 @@ function ProTraders({ leagueData, setLeagueData, applications, setApplications }
             </div>
           </div>
 
-          {/* Previous League */}
-          <div className="league-block">
-            <h2 className="league-date">
-              Previous League ({leagueData?.previousLeague?.startDate || '...'})
-            </h2>
-            <div className="league-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Trader</th>
-                    <th>Trades</th>
-                    <th>ROI</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leagueData?.previousLeague?.traders?.slice(0, 3).map((trader) => (
-                    <motion.tr
-                      key={trader.rank}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3, delay: trader.rank * 0.1 }}
-                      className={trader.rank === 1 ? 'top-trader' : ''}
-                    >
-                      <td>{trader.rank}</td>
-                      <td>{trader.name}</td>
-                      <td>{trader.trades}</td>
-                      <td><span className="roi">{trader.roi}%</span></td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          
 
           {/* Previous Winners (Static for now) */}
           <div className="league-block">
-            <h2 className="league-date">Previous Winners</h2>
+            <h2 className="league-date">Top Traders</h2>
             <div className="previous-winners">
               <div className="winner-card">
-                <span className="winner-date">January 2024</span>
-                <span className="winner-name">Alex Thompson</span>
+                <span className="winner-date">Jan 2024</span>
+                <span className="winner-name">Ashish C</span>
                 <span className="winner-roi">ROI: 92.5%</span>
               </div>
               <div className="winner-card">
-                <span className="winner-date">December 2023</span>
-                <span className="winner-name">Maria Garcia</span>
+                <span className="winner-date">Dec 2023</span>
+                <span className="winner-name">Manisha M</span>
                 <span className="winner-roi">ROI: 88.7%</span>
               </div>
               <div className="winner-card">
-                <span className="winner-date">November 2023</span>
-                <span className="winner-name">Chris Wilson</span>
+                <span className="winner-date">Nov 2023</span>
+                <span className="winner-name">Chetan Patil</span>
                 <span className="winner-roi">ROI: 85.2%</span>
               </div>
             </div>

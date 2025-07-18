@@ -8,11 +8,6 @@ import TradingViewWidget2 from '../charts/TradingViewWidget2';
 import TradingViewWidget3 from '../charts/TradingViewWidget3';
 import TradingViewWidget4 from '../charts/TradingViewWidget4';
 
-// import video1 from '../assets/SMC-D4.mp4';
-// import video2 from '../assets/basics-of-stock-market-D1.mp4';
-// import video3 from '../assets/option-chain-basics-D2.mp4';
-// import video4 from '../assets/PRICE-ACTION-D3.mp4';
-
 import vbg1 from '../assets/vbg1.png';
 import vbg2 from '../assets/vbg2.png';
 import vbg3 from '../assets/vbg3.png';
@@ -377,8 +372,8 @@ function Home() {
       {/* Videos Section */}
       <section className="videos-section">
       <div className="tutorial-videos-header">
-       {/* <div className="tutorial-icon">📹</div> */}
-       <h2>Tutorial Videos</h2>
+       
+       <h2>📹Tutorial Videos</h2>
       </div>
         <div className="video-grid">
           {videos.map((video) => (
@@ -409,7 +404,14 @@ function Home() {
                       alt={video.title}
                       className="video-thumbnail"
                     />
-                    {video.videoUrl && <div className="play-icon">▶️</div>}
+                    {video.videoUrl && (
+                      <div className="play-icon">
+                        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                          <circle cx="14" cy="14" r="14" fill="currentColor" opacity="0.15"/>
+                          <polygon points="11,9 20,14 11,19" fill="currentColor"/>
+                        </svg>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
