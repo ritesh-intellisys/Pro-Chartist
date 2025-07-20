@@ -12,6 +12,11 @@ import AdminPanel from './pages/AdminPanel';
 import AdminLogin from './pages/AdminLogin';
 import ResetPassword from './pages/ResetPassword';
 import AdminResetPassword from './pages/AdminResetPassword';
+import CourseDetail from './pages/CourseDetail';
+import SmartMoneyConcept from './pages/SmartMoneyConcept';
+import StockSwingBotStrategy from './pages/StockSwingBotStrategy';
+import NineTwentyStrategy from './pages/NineTwentyStrategy';
+import PriceLineBotStrategy from './pages/PriceLineBotStrategy';
 import './App.css';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -19,10 +24,8 @@ import ScrollToTop from './components/ScrollToTop';
 function App() {
   const [theme, setTheme] = useState('light');
   const [applications, setApplications] = useState([]);
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
-    // Check if admin is authenticated from localStorage
-    return localStorage.getItem('isAdminAuthenticated') === 'true';
-  });
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState(() => localStorage.getItem('isUserAuthenticated') === 'true');
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => localStorage.getItem('isAdminAuthenticated') === 'true');
 
   // State for league data
   const [leagueData, setLeagueData] = useState({
@@ -63,13 +66,15 @@ function App() {
         <Header 
           theme={theme} 
           toggleTheme={toggleTheme} 
+          isUserAuthenticated={isUserAuthenticated}
+          setIsUserAuthenticated={setIsUserAuthenticated}
           isAdminAuthenticated={isAdminAuthenticated}
           setIsAdminAuthenticated={setIsAdminAuthenticated}
         />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/learning" element={<Learning />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login setIsUserAuthenticated={setIsUserAuthenticated} />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/admin/reset-password" element={<AdminResetPassword />} />
@@ -99,12 +104,13 @@ function App() {
           />
           <Route 
             path="/admin/login" 
-            element={
-              <AdminLogin 
-                setIsAdminAuthenticated={setIsAdminAuthenticated}
-              />
-            } 
+            element={<AdminLogin setIsAdminAuthenticated={setIsAdminAuthenticated} />} 
           />
+          <Route path="/course/smc" element={<SmartMoneyConcept />} />
+          <Route path="/course/stock-swing" element={<StockSwingBotStrategy />} />
+          <Route path="/course/9-20" element={<NineTwentyStrategy />} />
+          <Route path="/course/price-line-bot" element={<PriceLineBotStrategy />} />
+          <Route path="/course/:id" element={<CourseDetail />} />
         </Routes>
         <Footer />
         <Toaster

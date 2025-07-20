@@ -1,0 +1,26 @@
+﻿
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : [{"_id":"687cb8a4d3621552c73adfca","title":"wdfe","validity":"erewrew","discount":"50%"
+                    ,"currentPrice":"qdede","originalPrice":"dwedw","imageUrl":"/uploads/1753004196109-ADVE
+                    RTISEMENT FLYER (( VAKRATU...
+RawContent        : HTTP/1.1 200 OK
+                    Vary: Origin
+                    Access-Control-Allow-Credentials: true
+                    Connection: keep-alive
+                    Keep-Alive: timeout=5
+                    Content-Length: 917
+                    Content-Type: application/json; charset=utf-8
+                    Date: Sun, 20 ...
+Forms             : {}
+Headers           : {[Vary, Origin], [Access-Control-Allow-Credentials, true], [Connection, keep-alive], 
+                    [Keep-Alive, timeout=5]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : System.__ComObject
+RawContentLength  : 917
+
+
+

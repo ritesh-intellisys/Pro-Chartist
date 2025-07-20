@@ -19,6 +19,87 @@ function ConfirmModal({ open, message, onConfirm, onCancel }) {
   );
 }
 
+function CourseModal({ course, onClose, onSave }) {
+  const [form, setForm] = useState({
+    title: course?.title || '',
+    validity: course?.validity || '',
+    discount: course?.discount || '',
+    currentPrice: course?.currentPrice || '',
+    originalPrice: course?.originalPrice || '',
+    image: null,
+  });
+  const [preview, setPreview] = useState(course?.imageUrl ? `http://localhost:5002${course.imageUrl}` : null);
+  const [loading, setLoading] = useState(false);
+
+  const inputStyle = {
+    width: '100%',
+    marginBottom: 10,
+    background: 'var(--bg-primary, #fff)',
+    color: 'var(--text-primary, #222)',
+    border: '1px solid var(--border-color, #ccc)',
+    borderRadius: 6,
+    padding: '0.5rem',
+    fontSize: '1rem',
+    boxSizing: 'border-box',
+  };
+
+  const handleChange = e => {
+    const { name, value, files } = e.target;
+    if (name === 'image') {
+      setForm(f => ({ ...f, image: files[0] }));
+      setPreview(files[0] ? URL.createObjectURL(files[0]) : preview);
+    } else {
+      setForm(f => ({ ...f, [name]: value }));
+    }
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setLoading(true);
+    const formData = new FormData();
+    Object.entries(form).forEach(([k, v]) => {
+      if (v) formData.append(k, v);
+    });
+    const method = course ? 'PUT' : 'POST';
+    const url = course ? `http://localhost:5002/api/courses/${course._id}` : 'http://localhost:5002/api/courses';
+    try {
+      const res = await fetch(url, { method, body: formData });
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err.error || 'Failed to save course');
+        setLoading(false);
+        return;
+      }
+      toast.success('Course saved successfully!');
+      setLoading(false);
+      onSave();
+      onClose();
+    } catch (err) {
+      toast.error('Network error');
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <form onSubmit={handleSubmit} style={{ background: 'var(--card-bg)', borderRadius: 12, padding: 32, minWidth: 320, maxWidth: 400, boxShadow: '0 4px 24px rgba(0,0,0,0.13)', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}>
+        <h2 style={{ color: 'var(--accent-color)', marginBottom: 16 }}>{course ? 'Edit Course' : 'Add New Course'}</h2>
+        <label>Title<input name="title" value={form.title} onChange={handleChange} required style={inputStyle} /></label>
+        <label>Validity<input name="validity" value={form.validity} onChange={handleChange} style={inputStyle} /></label>
+        <label>Discount (%)<input name="discount" value={form.discount} onChange={handleChange} style={inputStyle} /></label>
+        <label>Current Price (₹)<input name="currentPrice" value={form.currentPrice} onChange={handleChange} style={inputStyle} /></label>
+        <label>Original Price (₹)<input name="originalPrice" value={form.originalPrice} onChange={handleChange} style={inputStyle} /></label>
+        <label>Image<input name="image" type="file" accept="image/*" onChange={handleChange} style={inputStyle} /></label>
+        {preview && <img src={preview} alt="Preview" style={{ width: 80, borderRadius: 8, marginBottom: 10 }} />}
+        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+          <button type="submit" className="update-btn" disabled={loading}>{loading ? 'Saving...' : 'Save'}</button>
+          <button type="button" className="update-btn bg-gray-400" onClick={onClose}>Cancel</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 function AdminPanel({ leagueData, setLeagueData, applications, setApplications }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [acceptedApplications, setAcceptedApplications] = useState([]);
@@ -101,7 +182,7 @@ function AdminPanel({ leagueData, setLeagueData, applications, setApplications }
     const fetchLeagueData = async () => {
       try {
         const res = await fetch('http://localhost:5002/api/league');
-        const data = await res.json();
+const data = await res.json();
 
         if (data) {
           setLeagueData(data);
@@ -295,31 +376,31 @@ function AdminPanel({ leagueData, setLeagueData, applications, setApplications }
     else actionMsg = 'revert this application to pending';
     askConfirm(`Are you sure you want to ${actionMsg}?`, async () => {
       closeConfirm();
-      try {
-        const appId = application._id || application.id;
-        const res = await fetch(`http://localhost:5002/api/applicationsByDate/${appId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: newStatus }),
-        });
+    try {
+      const appId = application._id || application.id;
+      const res = await fetch(`http://localhost:5002/api/applicationsByDate/${appId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
 
-        if (!res.ok) throw new Error('Failed to update application');
+      if (!res.ok) throw new Error('Failed to update application');
 
-        const updatedApp = await res.json();
+      const updatedApp = await res.json();
 
-        setApplications(prev => prev.filter(app => app._id !== appId));
-        setAcceptedApplications(prev => prev.filter(app => app._id !== appId));
-        setRejectedApplications(prev => prev.filter(app => app._id !== appId));
+      setApplications(prev => prev.filter(app => app._id !== appId));
+      setAcceptedApplications(prev => prev.filter(app => app._id !== appId));
+      setRejectedApplications(prev => prev.filter(app => app._id !== appId));
 
-        if (newStatus === 'approved') setAcceptedApplications(prev => [...prev, updatedApp]);
-        else if (newStatus === 'rejected') setRejectedApplications(prev => [...prev, updatedApp]);
-        else setApplications(prev => [...prev, updatedApp]);
+      if (newStatus === 'approved') setAcceptedApplications(prev => [...prev, updatedApp]);
+      else if (newStatus === 'rejected') setRejectedApplications(prev => [...prev, updatedApp]);
+      else setApplications(prev => [...prev, updatedApp]);
 
-        toast.success(`Application marked as ${newStatus}`);
-      } catch (err) {
-        console.error('Update status failed:', err);
-        toast.error('Failed to update application status');
-      }
+      toast.success(`Application marked as ${newStatus}`);
+    } catch (err) {
+      console.error('Update status failed:', err);
+      toast.error('Failed to update application status');
+    }
     });
   };
 
@@ -344,22 +425,22 @@ function AdminPanel({ leagueData, setLeagueData, applications, setApplications }
     }
     askConfirm('Are you sure you want to update league dates?', async () => {
       closeConfirm();
-      try {
-        const res = await fetch('http://localhost:5002/api/league', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ currentLeague: leagueData.currentLeague }),
-        });
-        if (!res.ok) throw new Error('Failed to save league data');
-        const updated = await res.json();
-        setLeagueData(updated);
-        setModifiedTraders(updated.currentLeague.traders);
-        localStorage.setItem('leagueData', JSON.stringify(updated));
-        toast.success('League data saved!');
-      } catch (err) {
-        console.error(err);
-        toast.error('Failed to save league data');
-      }
+    try {
+      const res = await fetch('http://localhost:5002/api/league', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentLeague: leagueData.currentLeague }),
+      });
+      if (!res.ok) throw new Error('Failed to save league data');
+      const updated = await res.json();
+      setLeagueData(updated);
+      setModifiedTraders(updated.currentLeague.traders);
+      localStorage.setItem('leagueData', JSON.stringify(updated));
+      toast.success('League data saved!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save league data');
+    }
     });
   };
   
@@ -375,32 +456,32 @@ function AdminPanel({ leagueData, setLeagueData, applications, setApplications }
   const handleSubmitTraders = async () => {
     askConfirm('Are you sure you want to update top traders?', async () => {
       closeConfirm();
-      const updatedLeague = {
-        ...leagueData,
-        currentLeague: {
-          ...leagueData.currentLeague,
-          traders: modifiedTraders.slice(0, 3),
-        },
-      };
+    const updatedLeague = {
+      ...leagueData,
+      currentLeague: {
+        ...leagueData.currentLeague,
+        traders: modifiedTraders.slice(0, 3),
+      },
+    };
 
-      try {
-        const res = await fetch('http://localhost:5002/api/league', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ currentLeague: updatedLeague.currentLeague }),
-        });
+    try {
+      const res = await fetch('http://localhost:5002/api/league', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentLeague: updatedLeague.currentLeague }),
+      });
 
-        if (!res.ok) throw new Error('Failed to save trader data');
+      if (!res.ok) throw new Error('Failed to save trader data');
 
-        const updated = await res.json();
-        setLeagueData(updated);
-        setModifiedTraders(updated.currentLeague.traders);
-        localStorage.setItem("leagueData", JSON.stringify(updated));
-        toast.success('Top traders updated successfully!');
-      } catch (err) {
-        console.error(err);
-        toast.error('Failed to update traders');
-      }
+      const updated = await res.json();
+      setLeagueData(updated);
+      setModifiedTraders(updated.currentLeague.traders);
+      localStorage.setItem("leagueData", JSON.stringify(updated));
+      toast.success('Top traders updated successfully!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update traders');
+    }
     });
   };
 
@@ -413,6 +494,23 @@ function AdminPanel({ leagueData, setLeagueData, applications, setApplications }
   else if (applicationFilter === 'accepted') filteredApplications = acceptedApplications;
   else if (applicationFilter === 'rejected') filteredApplications = rejectedApplications;
 
+  const [courses, setCourses] = useState([]);
+  const [showCourseModal, setShowCourseModal] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState(null);
+
+  useEffect(() => {
+    fetch('http://localhost:5002/api/courses')
+      .then(res => res.json())
+      .then(setCourses);
+  }, []);
+  const refreshCourses = () => {
+    fetch('http://localhost:5002/api/courses')
+      .then(res => res.json())
+      .then(setCourses);
+  };
+
   return (
     <div className="admin-panel">
       <div className="admin-header">
@@ -423,55 +521,55 @@ function AdminPanel({ leagueData, setLeagueData, applications, setApplications }
       <div className="admin-content">
         {/* Flex row for League Management and Update Top Traders */}
         <div className="flex-row-admin-panel">
-          <div className="league-management">
-            <h2 className="text-2xl font-bold mb-4">League Management</h2>
-            <form onSubmit={updateLeagueData}>
-              <div className="form-group">
-                <label className="font-medium mb-1 block">Current League Start Date</label>
-                <input
-                  type="date"
-                  min={todayStr}
-                  value={leagueData.currentLeague.startDate}
-                  onChange={(e) => setLeagueData({
-                    ...leagueData,
-                    currentLeague: {
-                      ...leagueData.currentLeague,
-                      startDate: e.target.value,
-                    },
-                  })}
-                />
-              </div>
-              <div className="form-group">
-                <label className="font-medium mb-1 block">Next League Start Date</label>
-                <input
-                  type="date"
-                  min={todayStr}
-                  value={leagueData.currentLeague.nextLeagueStart}
-                  onChange={(e) => setLeagueData({
-                    ...leagueData,
-                    currentLeague: {
-                      ...leagueData.currentLeague,
-                      nextLeagueStart: e.target.value,
-                    },
-                  })}
-                />
-              </div>
-              <div className="form-group">
-                <label className="font-medium mb-1 block">Current Participants</label>
-                <input
-                  type="number"
-                  value={leagueData.currentLeague.participants}
-                  onChange={(e) => setLeagueData({
-                    ...leagueData,
-                    currentLeague: {
-                      ...leagueData.currentLeague,
-                      participants: parseInt(e.target.value),
-                    },
-                  })}
-                />
-              </div>
-              <button type="submit" className="update-btn">Update League Dates</button>
-            </form>
+        <div className="league-management">
+          <h2 className="text-2xl font-bold mb-4">League Management</h2>
+          <form onSubmit={updateLeagueData}>
+            <div className="form-group">
+              <label className="font-medium mb-1 block">Current League Start Date</label>
+              <input
+                type="date"
+                min={todayStr}
+                value={leagueData.currentLeague.startDate}
+                onChange={(e) => setLeagueData({
+                  ...leagueData,
+                  currentLeague: {
+                    ...leagueData.currentLeague,
+                    startDate: e.target.value,
+                  },
+                })}
+              />
+            </div>
+            <div className="form-group">
+              <label className="font-medium mb-1 block">Next League Start Date</label>
+              <input
+                type="date"
+                min={todayStr}
+                value={leagueData.currentLeague.nextLeagueStart}
+                onChange={(e) => setLeagueData({
+                  ...leagueData,
+                  currentLeague: {
+                    ...leagueData.currentLeague,
+                    nextLeagueStart: e.target.value,
+                  },
+                })}
+              />
+            </div>
+            <div className="form-group">
+              <label className="font-medium mb-1 block">Current Participants</label>
+              <input
+                type="number"
+                value={leagueData.currentLeague.participants}
+                onChange={(e) => setLeagueData({
+                  ...leagueData,
+                  currentLeague: {
+                    ...leagueData.currentLeague,
+                    participants: parseInt(e.target.value),
+                  },
+                })}
+              />
+            </div>
+            <button type="submit" className="update-btn">Update League Dates</button>
+          </form>
           </div>
 
           <div className="update-traders">
@@ -714,48 +812,109 @@ function AdminPanel({ leagueData, setLeagueData, applications, setApplications }
                   </tr>
                 ) : (
                   filteredApplications.map((app, index) => (
-                    <tr key={app._id || index}>
-                      <td>{app.name}</td>
-                      <td>{app.mobile}</td>
-                      <td>
-                        {app.imageUrl && (
-                          <img
-                            src={`http://localhost:5002/${app.imageUrl}`}
-                            alt="Trading Screenshot"
-                            width="50"
-                            onClick={() => openImageModal(`http://localhost:5002/${app.imageUrl}`)}
-                            style={{ cursor: 'pointer' }}
-                          />
-                        )}
-                      </td>
-                      {applicationFilter === 'pending' && <td>Pending</td>}
-                      <td>
-                        {applicationFilter === 'pending' && (
-                          <>
-                            <button onClick={() => handleApplicationStatus(app, 'approved')} className="action-btn approve">Approve</button>
-                            <button onClick={() => handleApplicationStatus(app, 'rejected')} className="action-btn reject">Reject</button>
-                          </>
-                        )}
-                        {applicationFilter === 'accepted' && (
-                          <>
-                            <button onClick={() => handleApplicationStatus(app, 'rejected')} className="action-btn reject">Reject</button>
-                            <button onClick={() => handleApplicationStatus(app, 'pending')} className="action-btn revert">Revert to Pending</button>
-                          </>
-                        )}
-                        {applicationFilter === 'rejected' && (
-                          <>
-                            <button onClick={() => handleApplicationStatus(app, 'approved')} className="action-btn approve">Approve</button>
-                            <button onClick={() => handleApplicationStatus(app, 'pending')} className="action-btn revert">Revert to Pending</button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
+                  <tr key={app._id || index}>
+                    <td>{app.name}</td>
+                    <td>{app.mobile}</td>
+                    <td>
+                      {app.imageUrl && (
+                        <img
+                          src={`http://localhost:5002/${app.imageUrl}`}
+                          alt="Trading Screenshot"
+                          width="50"
+                          onClick={() => openImageModal(`http://localhost:5002/${app.imageUrl}`)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      )}
+                    </td>
+                    {applicationFilter === 'pending' && <td>Pending</td>}
+                    <td>
+                      {applicationFilter === 'pending' && (
+                        <>
+                          <button onClick={() => handleApplicationStatus(app, 'approved')} className="action-btn approve">Approve</button>
+                          <button onClick={() => handleApplicationStatus(app, 'rejected')} className="action-btn reject">Reject</button>
+                        </>
+                      )}
+                      {applicationFilter === 'accepted' && (
+                        <>
+                          <button onClick={() => handleApplicationStatus(app, 'rejected')} className="action-btn reject">Reject</button>
+                          <button onClick={() => handleApplicationStatus(app, 'pending')} className="action-btn revert">Revert to Pending</button>
+                        </>
+                      )}
+                      {applicationFilter === 'rejected' && (
+                        <>
+                          <button onClick={() => handleApplicationStatus(app, 'approved')} className="action-btn approve">Approve</button>
+                          <button onClick={() => handleApplicationStatus(app, 'pending')} className="action-btn revert">Revert to Pending</button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
                   ))
                 )}
               </tbody>
             </table>
           </div>
         </div>
+
+        <div className="admin-courses-section" style={{ margin: '2rem 0', background: 'var(--card-bg)', borderRadius: 12, padding: '2rem', boxShadow: '0 4px 16px rgba(0,0,0,0.10)' }}>
+          <h2 style={{ color: 'var(--accent-color)', marginBottom: 16 }}>Courses Management</h2>
+          <div className="courses-grid-admin" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
+            {/* Add New Course Card */}
+            <div
+              className="course-card-admin add-new"
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                background: 'var(--glass-bg)', borderRadius: 12, minHeight: 340, cursor: 'pointer', border: '2px dashed var(--accent-color)', color: 'var(--accent-color)', fontWeight: 600, fontSize: 18
+              }}
+              onClick={() => { setEditingCourse(null); setShowCourseModal(true); }}
+            >
+              <span style={{ fontSize: 48, marginBottom: 12 }}>+</span>
+              Add New Course
+            </div>
+            {/* Course Cards */}
+            {courses.map(course => (
+              <div key={course._id} className="course-card-admin" style={{ background: 'var(--glass-bg)', borderRadius: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.10)', overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 340, position: 'relative' }}>
+                <div style={{ position: 'relative', width: '100%', height: 160, background: '#222' }}>
+                  {course.imageUrl && <img src={`http://localhost:5002${course.imageUrl}`} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  <span className="discount-badge" style={{ position: 'absolute', top: 12, right: 12, background: 'var(--card-bg)', color: 'var(--accent-color)', padding: '0.4rem 1rem', borderRadius: 20, fontWeight: 500, fontSize: 14, boxShadow: '0 2px 4px rgba(0,0,0,0.10)' }}>{course.discount}%</span>
+                </div>
+                <div style={{ flex: 1, padding: '1.2rem' }}>
+                  <h3 style={{ color: 'var(--accent-color)', fontSize: 18, margin: 0, marginBottom: 6 }}>{course.title}</h3>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 8 }}>{course.validity}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                    <span style={{ color: 'var(--accent-color)', fontWeight: 700, fontSize: 18 }}>₹{course.currentPrice}</span>
+                    <span style={{ color: 'var(--text-secondary)', textDecoration: 'line-through', fontSize: 15 }}>₹{course.originalPrice}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                    <button className="update-btn" onClick={() => { setEditingCourse(course); setShowCourseModal(true); }}>Edit</button>
+                    <button className="update-btn bg-red-500" onClick={() => { setCourseToDelete(course); setShowDeleteConfirm(true); }}>Delete</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* CourseModal for Add/Edit */}
+          {showCourseModal && (
+            <CourseModal
+              course={editingCourse}
+              onClose={() => setShowCourseModal(false)}
+              onSave={refreshCourses}
+            />
+          )}
+          {/* Delete Confirmation Modal */}
+          {showDeleteConfirm && (
+            <ConfirmModal
+              open={showDeleteConfirm}
+              message={`Are you sure you want to delete "${courseToDelete?.title}"?`}
+              onConfirm={async () => {
+                await fetch(`http://localhost:5002/api/courses/${courseToDelete._id}`, { method: 'DELETE' });
+                setShowDeleteConfirm(false);
+                setCourseToDelete(null);
+                refreshCourses();
+              }}
+              onCancel={() => setShowDeleteConfirm(false)}
+            />
+          )}
+</div>
 
       </div>
 

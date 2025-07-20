@@ -11,6 +11,12 @@ function AdminLogin({ setIsAdminAuthenticated }) {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [showAdminReset, setShowAdminReset] = useState(false);
+  // Reset admin stepper state
+  const [resetStep, setResetStep] = useState('email'); // 'email' | 'otp' | 'reset'
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetOtp, setResetOtp] = useState('');
+  const [resetOtpSent, setResetOtpSent] = useState(false);
+  const [resetOtpVerified, setResetOtpVerified] = useState(false);
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [newAdminPassword, setNewAdminPassword] = useState('');
   const [resetError, setResetError] = useState('');
@@ -57,27 +63,81 @@ function AdminLogin({ setIsAdminAuthenticated }) {
     }
   };
 
-  // ✅ Admin Reset
+  // Step 1: Send OTP to existing admin email
+  const handleSendResetOtp = async (e) => {
+    e.preventDefault();
+    setResetError('');
+    setIsLoading(true);
+    try {
+      if (!resetEmail) throw new Error('Email is required');
+      // Use correct admin endpoint
+      const response = await fetch('http://localhost:5002/api/admin/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to send OTP');
+      setResetOtpSent(true);
+      setResetStep('otp');
+      toast.success('OTP sent to your email!');
+    } catch (error) {
+      setResetError(error.message);
+      toast.error(error.message || 'Failed to send OTP');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Step 2: Verify OTP
+  const handleVerifyResetOtp = async (e) => {
+    e.preventDefault();
+    setResetError('');
+    setIsLoading(true);
+    try {
+      if (!resetOtp) throw new Error('OTP is required');
+      // Use correct admin endpoint
+      const response = await fetch('http://localhost:5002/api/admin/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail, otp: resetOtp })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Invalid OTP');
+      setResetOtpVerified(true);
+      setResetStep('reset');
+      toast.success('OTP verified! You can now reset admin credentials.');
+    } catch (error) {
+      setResetError(error.message);
+      toast.error(error.message || 'Invalid OTP');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Step 3: Reset admin credentials with OTP
   const handleAdminReset = async (e) => {
     e.preventDefault();
     setResetError('');
     setIsLoading(true);
-
     try {
       if (!newAdminEmail || !newAdminPassword) throw new Error('Email and password are required');
       if (newAdminPassword.length < 8) throw new Error('Password must be at least 8 characters');
-
-      const response = await fetch('http://localhost:5002/api/admin/reset', {
+      // Use correct admin endpoint and include OTP
+      const response = await fetch('http://localhost:5002/api/admin/reset-password-with-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: newAdminEmail, password: newAdminPassword })
+        body: JSON.stringify({ email: resetEmail, otp: resetOtp, newPassword: newAdminPassword, newEmail: newAdminEmail })
       });
-
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Reset failed');
-
+      if (!response.ok) throw new Error(data.message || 'Reset failed');
       toast.success('Admin credentials reset successfully!');
       setShowAdminReset(false);
+      setResetStep('email');
+      setResetEmail('');
+      setResetOtp('');
+      setResetOtpSent(false);
+      setResetOtpVerified(false);
       setNewAdminEmail('');
       setNewAdminPassword('');
     } catch (error) {
@@ -134,52 +194,123 @@ function AdminLogin({ setIsAdminAuthenticated }) {
     </div>
   );
 
-  const renderAdminResetForm = () => (
+  // New: Render reset admin stepper
+  const renderAdminResetStepper = () => (
     <div className="login-card">
       <h2>Reset Admin Credentials</h2>
-      <form onSubmit={handleAdminReset}>
-        <div className="form-group">
-          <label>New Email</label>
-          <input
-            type="email"
-            value={newAdminEmail}
-            onChange={(e) => setNewAdminEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>New Password</label>
-          <input
-            type="password"
-            value={newAdminPassword}
-            onChange={(e) => setNewAdminPassword(e.target.value)}
-            required
-            minLength={8}
-          />
-        </div>
-        {resetError && <div className="error-message">{resetError}</div>}
-        <button type="submit" className="login-btn" disabled={isLoading}>
-          {isLoading ? 'Resetting...' : 'Reset Admin Credentials'}
-        </button>
-        <button
-          type="button"
-          className="back-btn"
-          onClick={() => {
-            setShowAdminReset(false);
-            setNewAdminEmail('');
-            setNewAdminPassword('');
-            setResetError('');
-          }}
-        >
-          Back to Login
-        </button>
-      </form>
+      {resetStep === 'email' && (
+        <form onSubmit={handleSendResetOtp}>
+          <div className="form-group">
+            <label>Existing Admin Email</label>
+            <input
+              type="email"
+              value={resetEmail}
+              onChange={e => setResetEmail(e.target.value)}
+              required
+            />
+          </div>
+          {resetError && <div className="error-message">{resetError}</div>}
+          <button type="submit" className="login-btn" disabled={isLoading}>
+            {isLoading ? 'Sending OTP...' : 'Send OTP'}
+          </button>
+          <button
+            type="button"
+            className="back-btn"
+            onClick={() => {
+              setShowAdminReset(false);
+              setResetStep('email');
+              setResetEmail('');
+              setResetOtp('');
+              setResetOtpSent(false);
+              setResetOtpVerified(false);
+              setNewAdminEmail('');
+              setNewAdminPassword('');
+              setResetError('');
+            }}
+          >
+            Back to Login
+          </button>
+        </form>
+      )}
+      {resetStep === 'otp' && (
+        <form onSubmit={handleVerifyResetOtp}>
+          <div className="form-group">
+            <label>Enter OTP</label>
+            <input
+              type="text"
+              value={resetOtp}
+              onChange={e => setResetOtp(e.target.value)}
+              required
+            />
+          </div>
+          {resetError && <div className="error-message">{resetError}</div>}
+          <button type="submit" className="login-btn" disabled={isLoading}>
+            {isLoading ? 'Verifying...' : 'Verify OTP'}
+          </button>
+          <button
+            type="button"
+            className="back-btn"
+            onClick={() => {
+              setResetStep('email');
+              setResetOtp('');
+              setResetOtpSent(false);
+              setResetOtpVerified(false);
+              setResetError('');
+            }}
+          >
+            Back
+          </button>
+        </form>
+      )}
+      {resetStep === 'reset' && (
+        <form onSubmit={handleAdminReset}>
+          <div className="form-group">
+            <label>New Admin Email</label>
+            <input
+              type="email"
+              value={newAdminEmail}
+              onChange={e => setNewAdminEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>New Password</label>
+            <input
+              type="password"
+              value={newAdminPassword}
+              onChange={e => setNewAdminPassword(e.target.value)}
+              required
+              minLength={8}
+            />
+          </div>
+          {resetError && <div className="error-message">{resetError}</div>}
+          <button type="submit" className="login-btn" disabled={isLoading}>
+            {isLoading ? 'Resetting...' : 'Reset Admin Credentials'}
+          </button>
+          <button
+            type="button"
+            className="back-btn"
+            onClick={() => {
+              setResetStep('email');
+              setResetEmail('');
+              setResetOtp('');
+              setResetOtpSent(false);
+              setResetOtpVerified(false);
+              setNewAdminEmail('');
+              setNewAdminPassword('');
+              setResetError('');
+            }}
+          >
+            Back
+          </button>
+        </form>
+      )}
     </div>
   );
 
   return (
     <div className="admin-login">
-      {showAdminReset ? renderAdminResetForm() : renderLoginForm()}
+      {showAdminReset ? renderAdminResetStepper() : renderLoginForm()}
     </div>
   );
 }

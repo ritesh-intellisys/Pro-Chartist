@@ -7,7 +7,7 @@ import './Login.css';
 
 const API_URL = "http://localhost:5002/api/users";
 
-function Login() {
+function Login({ setIsUserAuthenticated }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
@@ -30,6 +30,8 @@ function Login() {
       await loginSchema.validate(formData, { abortEarly: false });
       const response = await axios.post(`${API_URL}/login`, formData);
       localStorage.setItem('authToken', response.data.token);
+      localStorage.setItem('isUserAuthenticated', 'true');
+      if (setIsUserAuthenticated) setIsUserAuthenticated(true); // <-- Ensure Header updates
       toast.success('Logged in successfully!');
       navigate('/');
     } catch (error) {
@@ -46,6 +48,14 @@ function Login() {
       setIsLoading(false);
     }
   };
+
+  // Optionally, add a logout function for user
+  // const handleLogout = () => {
+  //   localStorage.removeItem('isUserAuthenticated');
+  //   localStorage.removeItem('authToken');
+  //   if (setIsUserAuthenticated) setIsUserAuthenticated(false);
+  //   navigate('/login');
+  // };
 
   return (
     <div className="login-container">

@@ -62,7 +62,8 @@
   border: 20px solid #bfdbfe;
   border-radius: 8px;
   overflow: hidden;
-  background: var(--glass-bg);
+  /* background: var(--glass-bg); */
+  background-color: black;
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;

@@ -93,6 +93,13 @@ function AdminResetPassword() {
             <button type="submit" className="login-btn" disabled={isLoading}>
               {isLoading ? 'Sending OTP...' : 'Send OTP'}
             </button>
+            <button
+              type="button"
+              className="back-btn"
+              onClick={() => navigate('/admin/login')}
+            >
+              Back to Login
+            </button>
           </form>
         )}
 
@@ -110,6 +117,13 @@ function AdminResetPassword() {
             </div>
             <button type="submit" className="login-btn" disabled={isLoading}>
               {isLoading ? 'Verifying...' : 'Verify OTP'}
+            </button>
+            <button
+              type="button"
+              className="back-btn"
+              onClick={() => navigate('/admin/login')}
+            >
+              Back to Login
             </button>
           </form>
         )}
@@ -129,6 +143,13 @@ function AdminResetPassword() {
             </div>
             <button type="submit" className="login-btn" disabled={isLoading}>
               {isLoading ? 'Updating...' : 'Reset Password'}
+            </button>
+            <button
+              type="button"
+              className="back-btn"
+              onClick={() => navigate('/admin/login')}
+            >
+              Back to Login
             </button>
           </form>
         )}

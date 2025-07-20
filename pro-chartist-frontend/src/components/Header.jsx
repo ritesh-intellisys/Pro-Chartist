@@ -5,7 +5,7 @@ import clsx from 'clsx';
 import './Header.css';
 import Logo from '../assets/Logo22.png'; 
 
-function Header({ theme, toggleTheme, isAdminAuthenticated, setIsAdminAuthenticated }) {
+function Header({ theme, toggleTheme, isUserAuthenticated, setIsUserAuthenticated, isAdminAuthenticated, setIsAdminAuthenticated }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userType, setUserType] = useState(() => localStorage.getItem('userType') || 'user');
@@ -39,7 +39,7 @@ function Header({ theme, toggleTheme, isAdminAuthenticated, setIsAdminAuthentica
         navigate('/admin/login');
       }
     } else {
-      if (isAdminAuthenticated) {
+      if (isUserAuthenticated) {
         navigate('/');
       } else {
         navigate('/login');
@@ -53,13 +53,19 @@ function Header({ theme, toggleTheme, isAdminAuthenticated, setIsAdminAuthentica
 
   const handleLogout = async () => {
     try {
-      // Clear admin authentication
-      setIsAdminAuthenticated(false);
-      localStorage.removeItem('isAdminAuthenticated');
-      
+      if (userType === 'admin' && isAdminAuthenticated) {
+        setIsAdminAuthenticated(false);
+        localStorage.removeItem('isAdminAuthenticated');
+        localStorage.removeItem('adminRole');
+        navigate('/admin/login');
+      } else if (userType === 'user' && isUserAuthenticated) {
+        setIsUserAuthenticated(false);
+        localStorage.removeItem('isUserAuthenticated');
+        localStorage.removeItem('authToken');
+        navigate('/login');
+      }
       setIsDropdownOpen(false);
       setIsMobileMenuOpen(false);
-      navigate(userType === 'admin' ? '/admin/login' : '/login');
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -156,7 +162,7 @@ function Header({ theme, toggleTheme, isAdminAuthenticated, setIsAdminAuthentica
                   </>
                 )}
               </button>
-              {isAdminAuthenticated ? (
+              {(isUserAuthenticated || isAdminAuthenticated) ? (
                 <button onClick={handleLogout} className="dropdown-item">
                   <FiUser className="theme-icon" />
                   <span>Logout</span>
@@ -210,7 +216,7 @@ function Header({ theme, toggleTheme, isAdminAuthenticated, setIsAdminAuthentica
                 </>
               )}
             </button>
-            {isAdminAuthenticated ? (
+            {(isUserAuthenticated || isAdminAuthenticated) ? (
               <button onClick={handleLogout} className="dropdown-item">
                 <FiUser className="theme-icon" />
                 <span>Logout</span>

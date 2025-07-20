@@ -16,6 +16,7 @@ const applicationsByDateRoutes = require('./routes/applicationsByDateRoutes');
 const authRoutes = require('./routes/authRoutes');
 const otpRoutes = require('./routes/otpRoutes');
 const videoRoutes = require('./routes/videoRoutes');
+const courseRoutes = require('./routes/courseRoutes');
 
 // Import Admin model
 const Admin = require('./models/Admin');
@@ -58,6 +59,7 @@ app.use('/api/users', authRoutes);
 app.use('/api', otpRoutes);
 app.use('/api/applicationsByDate', applicationsByDateRoutes);
 app.use('/api/videos', videoRoutes);
+app.use('/api/courses', courseRoutes);
 
 // ✅ Create default admin if not exists
 const createDefaultAdmin = async () => {
