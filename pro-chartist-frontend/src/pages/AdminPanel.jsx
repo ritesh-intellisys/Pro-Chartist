@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import './AdminPanel.css';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 // Confirmation Modal Component
 function ConfirmModal({ open, message, onConfirm, onCancel }) {
@@ -29,7 +30,7 @@ function CourseModal({ course, onClose, onSave }) {
     originalPrice: course?.originalPrice || '',
     image: null,
   });
-  const [preview, setPreview] = useState(course?.imageUrl ? `http://localhost:5002${course.imageUrl}` : null);
+  const [preview, setPreview] = useState(course?.imageUrl ? `${import.meta.env.VITE_API_URL}${course.imageUrl}` : null);
   const [loading, setLoading] = useState(false);
 
   const inputStyle = {
@@ -103,6 +104,7 @@ function CourseModal({ course, onClose, onSave }) {
 
 function AdminPanel({ leagueData, setLeagueData, applications, setApplications }) {
   const [selectedImage, setSelectedImage] = useState(null);
+  const [zoomedIn, setZoomedIn] = useState(false); // <-- Add zoom state
   const [acceptedApplications, setAcceptedApplications] = useState([]);
   const [rejectedApplications, setRejectedApplications] = useState([]);
   const [modifiedTraders, setModifiedTraders] = useState([]);
@@ -486,8 +488,15 @@ const data = await res.json();
     });
   };
 
-  const openImageModal = (imageUrl) => setSelectedImage(imageUrl);
+  const openImageModal = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setZoomedIn(false); // Reset zoom when opening
+  };
   const closeImageModal = () => setSelectedImage(null);
+  const toggleZoom = (e) => {
+    e.stopPropagation();
+    setZoomedIn(z => !z);
+  };
 
   // NEW: get filtered applications
   let filteredApplications = [];
@@ -647,7 +656,7 @@ const data = await res.json();
                       />
                       {video.thumbnail && (
                         <img
-                          src={video.thumbnail.startsWith('http') ? video.thumbnail : `http://localhost:5002${video.thumbnail}`}
+                          src={video.thumbnail.startsWith('http') ? video.thumbnail : `${import.meta.env.VITE_API_URL}${video.thumbnail}`}
                           alt="Thumbnail"
                           className="w-28 h-16 object-cover rounded-lg mt-2 border border-gray-300 dark:border-gray-700"
                         />
@@ -730,7 +739,7 @@ const data = await res.json();
                     <span className="font-semibold">Thumbnail:</span><br />
                     {video.thumbnail && (
                       <img
-                        src={video.thumbnail.startsWith('http') ? video.thumbnail : `http://localhost:5002${video.thumbnail}`}
+                        src={video.thumbnail.startsWith('http') ? video.thumbnail : `${import.meta.env.VITE_API_URL}${video.thumbnail}`}
                         alt="Thumbnail"
                         className="w-28 h-16 object-cover rounded-lg mt-2 border border-gray-300 dark:border-gray-700"
                       />
@@ -819,11 +828,18 @@ const data = await res.json();
                     <td>
                       {app.imageUrl && (
                         <img
-                          src={`http://localhost:5002/${app.imageUrl}`}
+                          src={`${import.meta.env.VITE_API_URL}/${app.imageUrl}`}
                           alt="Trading Screenshot"
-                          width="50"
-                          onClick={() => openImageModal(`http://localhost:5002/${app.imageUrl}`)}
-                          style={{ cursor: 'pointer' }}
+                          onClick={() => openImageModal(`${import.meta.env.VITE_API_URL}/${app.imageUrl}`)}
+                          style={{
+                            cursor: 'pointer',
+                            maxWidth: '100%',
+                            maxHeight: '60px',
+                            objectFit: 'contain',
+                            borderRadius: '8px',
+                            display: 'block',
+                            margin: '0 auto'
+                          }}
                         />
                       )}
                     </td>
@@ -875,7 +891,7 @@ const data = await res.json();
             {courses.map(course => (
               <div key={course._id} className="course-card-admin" style={{ background: 'var(--glass-bg)', borderRadius: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.10)', overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 340, position: 'relative' }}>
                 <div style={{ position: 'relative', width: '100%', height: 160, background: '#222' }}>
-                  {course.imageUrl && <img src={`http://localhost:5002${course.imageUrl}`} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  {course.imageUrl && <img src={`${import.meta.env.VITE_API_URL}${course.imageUrl}`} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   <span className="discount-badge" style={{ position: 'absolute', top: 12, right: 12, background: 'var(--card-bg)', color: 'var(--accent-color)', padding: '0.4rem 1rem', borderRadius: 20, fontWeight: 500, fontSize: 14, boxShadow: '0 2px 4px rgba(0,0,0,0.10)' }}>{course.discount}%</span>
                 </div>
                 <div style={{ flex: 1, padding: '1.2rem' }}>
@@ -920,10 +936,97 @@ const data = await res.json();
       </div>
 
       {selectedImage && (
-        <div className="image-modal" onClick={closeImageModal}>
-          <div className="modal-content">
-            <img src={selectedImage} alt="Enlarged Trading Screenshot" style={{ maxWidth: '90%', maxHeight: '90%' }} />
-            <button className="close-modal-btn" onClick={closeImageModal}>&times;</button>
+        <div
+          className="image-modal"
+          onClick={closeImageModal}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.7)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <div
+            className="modal-content"
+            style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '24px',
+              width: '90vw',
+              height: '90vh',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <TransformWrapper
+              initialScale={1}
+              minScale={0.5}
+              maxScale={5}
+              wheel={{ step: 0.1 }}
+              doubleClick={{ disabled: false }}
+              pinch={{ step: 0.1 }}
+              panning={{ velocityDisabled: true }}
+            >
+              {({ zoomIn, zoomOut, resetTransform, ...rest }) => (
+                <>
+                  <TransformComponent>
+                    <img
+                      src={selectedImage}
+                      alt="Enlarged Trading Screenshot"
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        objectFit: 'contain',
+                        borderRadius: '12px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                        display: 'block',
+                        margin: '0 auto'
+                      }}
+                    />
+                  </TransformComponent>
+                  <div style={{ position: 'absolute', bottom: 20, left: 20, display: 'flex', gap: 8 }}>
+                    <button onClick={zoomIn} style={{ background: '#0ea5e9', color: 'white', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 16, cursor: 'pointer' }}>+</button>
+                    <button onClick={zoomOut} style={{ background: '#222', color: 'white', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 16, cursor: 'pointer' }}>-</button>
+                    <button onClick={resetTransform} style={{ background: '#666', color: 'white', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 16, cursor: 'pointer' }}>Reset</button>
+                  </div>
+                </>
+              )}
+            </TransformWrapper>
+            <button
+              className="close-modal-btn"
+              onClick={closeImageModal}
+              style={{
+                position: 'absolute',
+                top: 20,
+                right: 20,
+                background: 'rgba(30,30,30,0.85)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '50%',
+                width: 44,
+                height: 44,
+                fontSize: 28,
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+                transition: 'background 0.2s'
+              }}
+              onMouseOver={e => (e.currentTarget.style.background = 'rgba(0,0,0,1)')}
+              onMouseOut={e => (e.currentTarget.style.background = 'rgba(30,30,30,0.85)')}
+            >
+              &times;
+            </button>
           </div>
         </div>
       )}

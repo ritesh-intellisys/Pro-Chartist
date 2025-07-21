@@ -46,10 +46,9 @@ function Learning() {
               <div className="course-image">
                 {course.imageUrl ? (
                   <img
-                    src={`http://localhost:5002${course.imageUrl}`}
-                    alt={`Course: ${course.title} - ${course.validity}`}
-                    loading="lazy"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    src={`${import.meta.env.VITE_API_URL}${course.imageUrl}`}
+                    alt={course.title}
+                    className="course-image"
                   />
                 ) : (
                   <picture>
