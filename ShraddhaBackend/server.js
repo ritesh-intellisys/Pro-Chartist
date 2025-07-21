@@ -26,14 +26,10 @@ connectDB();
 
 // ✅ CORS Middleware (dynamic origin or wildcard during dev)
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests from localhost:* during development
-    if (!origin || origin.startsWith('http://localhost:')) {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS not allowed from this origin'));
-    }
-  },
+  origin: [
+    'https://pro-chartist-final.vercel.app', // Vercel frontend
+    'http://localhost:5173' // Local development
+  ],
   credentials: true,
 }));
 
