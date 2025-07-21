@@ -24,7 +24,7 @@ const Admin = require('./models/Admin');
 const app = express();
 connectDB();
 
-// ✅ CORS Middleware (dynamic origin or wildcard during dev)
+// ✅ CORS Middleware (allow Vercel and localhost origins only)
 app.use(cors({
   origin: [
     'https://pro-chartist-final.vercel.app', // Vercel frontend
