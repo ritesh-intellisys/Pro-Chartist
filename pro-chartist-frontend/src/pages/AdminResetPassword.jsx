@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import './AdminLogin.css';
 
-const API_URL = 'http://localhost:5002/api/admin';
+const API_URL = import.meta.env.VITE_API_URL + '/api/admin';
 
 function AdminResetPassword() {
   const navigate = useNavigate();

@@ -21,6 +21,8 @@ function AdminLogin({ setIsAdminAuthenticated }) {
   const [newAdminPassword, setNewAdminPassword] = useState('');
   const [resetError, setResetError] = useState('');
 
+  const API_URL = import.meta.env.VITE_API_URL + '/api/admin';
+
   // ✅ Login
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,7 +32,7 @@ function AdminLogin({ setIsAdminAuthenticated }) {
     try {
       await loginSchema.validate(credentials, { abortEarly: false });
 
-      const response = await fetch('http://localhost:5002/api/admin/login', {
+      const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials)
@@ -71,7 +73,7 @@ function AdminLogin({ setIsAdminAuthenticated }) {
     try {
       if (!resetEmail) throw new Error('Email is required');
       // Use correct admin endpoint
-      const response = await fetch('http://localhost:5002/api/admin/send-otp', {
+      const response = await fetch(`${API_URL}/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail })
@@ -97,7 +99,7 @@ function AdminLogin({ setIsAdminAuthenticated }) {
     try {
       if (!resetOtp) throw new Error('OTP is required');
       // Use correct admin endpoint
-      const response = await fetch('http://localhost:5002/api/admin/verify-otp', {
+      const response = await fetch(`${API_URL}/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail, otp: resetOtp })
@@ -124,7 +126,7 @@ function AdminLogin({ setIsAdminAuthenticated }) {
       if (!newAdminEmail || !newAdminPassword) throw new Error('Email and password are required');
       if (newAdminPassword.length < 8) throw new Error('Password must be at least 8 characters');
       // Use correct admin endpoint and include OTP
-      const response = await fetch('http://localhost:5002/api/admin/reset-password-with-otp', {
+      const response = await fetch(`${API_URL}/reset-password-with-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail, otp: resetOtp, newPassword: newAdminPassword, newEmail: newAdminEmail })
@@ -263,47 +265,47 @@ function AdminLogin({ setIsAdminAuthenticated }) {
         </form>
       )}
       {resetStep === 'reset' && (
-        <form onSubmit={handleAdminReset}>
-          <div className="form-group">
+      <form onSubmit={handleAdminReset}>
+        <div className="form-group">
             <label>New Admin Email</label>
-            <input
-              type="email"
-              value={newAdminEmail}
+          <input
+            type="email"
+            value={newAdminEmail}
               onChange={e => setNewAdminEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>New Password</label>
-            <input
-              type="password"
-              value={newAdminPassword}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label>New Password</label>
+          <input
+            type="password"
+            value={newAdminPassword}
               onChange={e => setNewAdminPassword(e.target.value)}
-              required
-              minLength={8}
-            />
-          </div>
-          {resetError && <div className="error-message">{resetError}</div>}
-          <button type="submit" className="login-btn" disabled={isLoading}>
-            {isLoading ? 'Resetting...' : 'Reset Admin Credentials'}
-          </button>
-          <button
-            type="button"
-            className="back-btn"
-            onClick={() => {
+            required
+            minLength={8}
+          />
+        </div>
+        {resetError && <div className="error-message">{resetError}</div>}
+        <button type="submit" className="login-btn" disabled={isLoading}>
+          {isLoading ? 'Resetting...' : 'Reset Admin Credentials'}
+        </button>
+        <button
+          type="button"
+          className="back-btn"
+          onClick={() => {
               setResetStep('email');
               setResetEmail('');
               setResetOtp('');
               setResetOtpSent(false);
               setResetOtpVerified(false);
-              setNewAdminEmail('');
-              setNewAdminPassword('');
-              setResetError('');
-            }}
-          >
+            setNewAdminEmail('');
+            setNewAdminPassword('');
+            setResetError('');
+          }}
+        >
             Back
-          </button>
-        </form>
+        </button>
+      </form>
       )}
     </div>
   );

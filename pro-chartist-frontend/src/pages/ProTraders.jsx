@@ -13,11 +13,13 @@ function ProTraders({ leagueData, setLeagueData, applications, setApplications }
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // ✅ Fetch updated league data on mount
   useEffect(() => {
     const fetchLeagueData = async () => {
       try {
-        const res = await fetch('http://localhost:5002/api/league');
+        const res = await fetch(`${API_URL}/api/league`);
         const data = await res.json();
         setLeagueData(data);
       } catch (err) {
@@ -42,7 +44,7 @@ function ProTraders({ leagueData, setLeagueData, applications, setApplications }
       form.append('mobile', formData.mobile);
       form.append('image', formData.image);
 
-      const res = await fetch('http://localhost:5002/api/applicationsByDate', {
+      const res = await fetch(`${API_URL}/api/applicationsByDate`, {
         method: 'POST',
         body: form,
       });

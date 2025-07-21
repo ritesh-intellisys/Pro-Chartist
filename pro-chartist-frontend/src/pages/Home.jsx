@@ -1,3 +1,4 @@
+const API_URL = import.meta.env.VITE_API_URL;
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiChevronDown } from 'react-icons/fi';
@@ -12,6 +13,13 @@ import vbg1 from '../assets/vbg1.png';
 import vbg2 from '../assets/vbg2.png';
 import vbg3 from '../assets/vbg3.png';
 import vbg4 from '../assets/vbg4.png';
+
+import r1 from '../assets/r1.jpg';
+import r2 from '../assets/r2.jpg';
+import r3 from '../assets/r3.jpg';
+import r4 from '../assets/r4.jpg';
+import r5 from '../assets/r5.jpg';
+import r6 from '../assets/r6.jpg';
 
 import image1 from '../assets/image1.jpg';
 import image2 from '../assets/image2.jpg';
@@ -133,7 +141,7 @@ function Home() {
       role: "Option Trader",
       rating: 5,
       comment: "Price line bot is best for quick trade it gives best buy sell signal for momentum trading",
-      avatar: "https://i.pravatar.cc/150?img=1",
+      avatar: r1,
       image: image1
     },
     {

@@ -1,3 +1,4 @@
+const API_URL = import.meta.env.VITE_API_URL;
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -61,7 +62,7 @@ function CourseModal({ course, onClose, onSave }) {
       if (v) formData.append(k, v);
     });
     const method = course ? 'PUT' : 'POST';
-    const url = course ? `http://localhost:5002/api/courses/${course._id}` : 'http://localhost:5002/api/courses';
+    const url = course ? `${API_URL}/api/courses/${course._id}` : `${API_URL}/api/courses`;
     try {
       const res = await fetch(url, { method, body: formData });
       if (!res.ok) {
@@ -181,7 +182,7 @@ function AdminPanel({ leagueData, setLeagueData, applications, setApplications }
   useEffect(() => {
     const fetchLeagueData = async () => {
       try {
-        const res = await fetch('http://localhost:5002/api/league');
+        const res = await fetch(`${API_URL}/api/league`);
 const data = await res.json();
 
         if (data) {
@@ -207,7 +208,7 @@ const data = await res.json();
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const res = await fetch('http://localhost:5002/api/videos');
+        const res = await fetch(`${API_URL}/api/videos`);
         const data = await res.json();
         
         if (data && data.length > 0) {
@@ -261,7 +262,7 @@ const data = await res.json();
       if (!selectedDate) return;
   
       try {
-        const res = await fetch(`http://localhost:5002/api/applicationsByDate?date=${selectedDate}`);
+        const res = await fetch(`${API_URL}/api/applicationsByDate?date=${selectedDate}`);
         const data = await res.json(); // ⬅️ DIRECTLY use the array
   
         const pending = data.filter(app => app.status === 'pending');
@@ -288,7 +289,7 @@ const data = await res.json();
     formData.append('videoId', videoId);
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', 'http://localhost:5002/api/videos/upload', true);
+      xhr.open('POST', `${API_URL}/api/videos/upload`, true);
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
           const progress = (event.loaded / event.total) * 100;
@@ -350,7 +351,7 @@ const data = await res.json();
         videoUrl: video.videoUrl || '',
       }));
 
-      const res = await fetch('http://localhost:5002/api/videos/bulk/update', {
+      const res = await fetch(`${API_URL}/api/videos/bulk/update`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ videos: videosToSave })
@@ -378,7 +379,7 @@ const data = await res.json();
       closeConfirm();
     try {
       const appId = application._id || application.id;
-      const res = await fetch(`http://localhost:5002/api/applicationsByDate/${appId}`, {
+      const res = await fetch(`${API_URL}/api/applicationsByDate/${appId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -426,7 +427,7 @@ const data = await res.json();
     askConfirm('Are you sure you want to update league dates?', async () => {
       closeConfirm();
     try {
-      const res = await fetch('http://localhost:5002/api/league', {
+      const res = await fetch(`${API_URL}/api/league`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentLeague: leagueData.currentLeague }),
@@ -465,7 +466,7 @@ const data = await res.json();
     };
 
     try {
-      const res = await fetch('http://localhost:5002/api/league', {
+      const res = await fetch(`${API_URL}/api/league`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentLeague: updatedLeague.currentLeague }),
@@ -501,12 +502,12 @@ const data = await res.json();
   const [courseToDelete, setCourseToDelete] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:5002/api/courses')
+    fetch(`${API_URL}/api/courses`)
       .then(res => res.json())
       .then(setCourses);
   }, []);
   const refreshCourses = () => {
-    fetch('http://localhost:5002/api/courses')
+    fetch(`${API_URL}/api/courses`)
       .then(res => res.json())
       .then(setCourses);
   };
@@ -811,7 +812,7 @@ const data = await res.json();
                     </td>
                   </tr>
                 ) : (
-                  filteredApplications.map((app, index) => (
+                  filteredApplications.filter(app => app && app.name).map((app, index) => (
                   <tr key={app._id || index}>
                     <td>{app.name}</td>
                     <td>{app.mobile}</td>
@@ -906,7 +907,7 @@ const data = await res.json();
               open={showDeleteConfirm}
               message={`Are you sure you want to delete "${courseToDelete?.title}"?`}
               onConfirm={async () => {
-                await fetch(`http://localhost:5002/api/courses/${courseToDelete._id}`, { method: 'DELETE' });
+                await fetch(`${API_URL}/api/courses/${courseToDelete._id}`, { method: 'DELETE' });
                 setShowDeleteConfirm(false);
                 setCourseToDelete(null);
                 refreshCourses();

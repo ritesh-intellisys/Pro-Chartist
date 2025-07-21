@@ -54,8 +54,8 @@ function Header({ theme, toggleTheme, isUserAuthenticated, setIsUserAuthenticate
   const handleLogout = async () => {
     try {
       if (userType === 'admin' && isAdminAuthenticated) {
-        setIsAdminAuthenticated(false);
-        localStorage.removeItem('isAdminAuthenticated');
+      setIsAdminAuthenticated(false);
+      localStorage.removeItem('isAdminAuthenticated');
         localStorage.removeItem('adminRole');
         navigate('/admin/login');
       } else if (userType === 'user' && isUserAuthenticated) {

@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { signupSchema } from '../validation/schemas';
 import './Signup.css';
 
-const API_URL = 'http://localhost:5002/api/users';
+const API_URL = import.meta.env.VITE_API_URL + '/api/users';
 
 function Signup() {
   const navigate = useNavigate();
