@@ -30,7 +30,11 @@ function CourseModal({ course, onClose, onSave }) {
     originalPrice: course?.originalPrice || '',
     image: null,
   });
-  const [preview, setPreview] = useState(course?.imageUrl ? `${import.meta.env.VITE_API_URL}${course.imageUrl}` : null);
+  const [preview, setPreview] = useState(
+    course?.imageUrl
+      ? `${import.meta.env.VITE_API_URL}/${course.imageUrl.replace(/^\/?/, '')}`
+      : null
+  );
   const [loading, setLoading] = useState(false);
 
   const inputStyle = {
@@ -656,10 +660,14 @@ const data = await res.json();
                       />
                       {video.thumbnail && (
                         <img
-                          src={video.thumbnail.startsWith('http') ? video.thumbnail : `${import.meta.env.VITE_API_URL}${video.thumbnail}`}
-                          alt="Thumbnail"
-                          className="w-28 h-16 object-cover rounded-lg mt-2 border border-gray-300 dark:border-gray-700"
-                        />
+                        src={
+                          video.thumbnail.startsWith('http')
+                            ? video.thumbnail
+                            : `${import.meta.env.VITE_API_URL}/${video.thumbnail.replace(/^\/?/, '')}`
+                        }
+                        alt="Thumbnail"
+                        className="w-28 h-16 object-cover rounded-lg mt-2 border border-gray-300 dark:border-gray-700"
+                      />
                       )}
                       {uploadingVideo?.id === video.id && uploadingVideo?.type === 'thumbnail' && (
                         <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">Uploading thumbnail...</div>
@@ -739,10 +747,15 @@ const data = await res.json();
                     <span className="font-semibold">Thumbnail:</span><br />
                     {video.thumbnail && (
                       <img
-                        src={video.thumbnail.startsWith('http') ? video.thumbnail : `${import.meta.env.VITE_API_URL}${video.thumbnail}`}
-                        alt="Thumbnail"
-                        className="w-28 h-16 object-cover rounded-lg mt-2 border border-gray-300 dark:border-gray-700"
-                      />
+                      src={
+                        video.thumbnail.startsWith('http')
+                          ? video.thumbnail
+                          : `${import.meta.env.VITE_API_URL}/${video.thumbnail.replace(/^\/?/, '')}`
+                      }
+                      alt="Thumbnail"
+                      className="w-28 h-16 object-cover rounded-lg mt-2 border border-gray-300 dark:border-gray-700"
+                    />
+                    
                     )}
                   </div>
                   <div className="mb-2">
@@ -828,19 +841,22 @@ const data = await res.json();
                     <td>
                       {app.imageUrl && (
                         <img
-                          src={`${import.meta.env.VITE_API_URL}/${app.imageUrl}`}
-                          alt="Trading Screenshot"
-                          onClick={() => openImageModal(`${import.meta.env.VITE_API_URL}/${app.imageUrl}`)}
-                          style={{
-                            cursor: 'pointer',
-                            maxWidth: '100%',
-                            maxHeight: '60px',
-                            objectFit: 'contain',
-                            borderRadius: '8px',
-                            display: 'block',
-                            margin: '0 auto'
-                          }}
-                        />
+                        src={`${import.meta.env.VITE_API_URL}/${app.imageUrl.replace(/^\/?/, '')}`}
+                        alt="Trading Screenshot"
+                        onClick={() =>
+                          openImageModal(`${import.meta.env.VITE_API_URL}/${app.imageUrl.replace(/^\/?/, '')}`)
+                        }
+                        style={{
+                          cursor: 'pointer',
+                          maxWidth: '100%',
+                          maxHeight: '60px',
+                          objectFit: 'contain',
+                          borderRadius: '8px',
+                          display: 'block',
+                          margin: '0 auto',
+                        }}
+                      />
+                      
                       )}
                     </td>
                     {applicationFilter === 'pending' && <td>Pending</td>}
@@ -891,9 +907,32 @@ const data = await res.json();
             {courses.map(course => (
               <div key={course._id} className="course-card-admin" style={{ background: 'var(--glass-bg)', borderRadius: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.10)', overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 340, position: 'relative' }}>
                 <div style={{ position: 'relative', width: '100%', height: 160, background: '#222' }}>
-                  {course.imageUrl && <img src={`${import.meta.env.VITE_API_URL}${course.imageUrl}`} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-                  <span className="discount-badge" style={{ position: 'absolute', top: 12, right: 12, background: 'var(--card-bg)', color: 'var(--accent-color)', padding: '0.4rem 1rem', borderRadius: 20, fontWeight: 500, fontSize: 14, boxShadow: '0 2px 4px rgba(0,0,0,0.10)' }}>{course.discount}%</span>
-                </div>
+  {course.imageUrl && (
+    <img
+      src={`${import.meta.env.VITE_API_URL}/${course.imageUrl.replace(/^\/?/, '')}`}
+      alt={course.title}
+      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+    />
+  )}
+  <span
+    className="discount-badge"
+    style={{
+      position: 'absolute',
+      top: 12,
+      right: 12,
+      background: 'var(--card-bg)',
+      color: 'var(--accent-color)',
+      padding: '0.4rem 1rem',
+      borderRadius: 20,
+      fontWeight: 500,
+      fontSize: 14,
+      boxShadow: '0 2px 4px rgba(0,0,0,0.10)',
+    }}
+  >
+    {course.discount}%
+  </span>
+</div>
+
                 <div style={{ flex: 1, padding: '1.2rem' }}>
                   <h3 style={{ color: 'var(--accent-color)', fontSize: 18, margin: 0, marginBottom: 6 }}>{course.title}</h3>
                   <div style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 8 }}>{course.validity}</div>
