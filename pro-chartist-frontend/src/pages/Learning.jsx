@@ -29,10 +29,14 @@ function Learning() {
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5002/api/courses')
+    fetch(`${import.meta.env.VITE_API_URL}/api/courses`)
       .then(res => res.json())
-      .then(setCourses);
+      .then(setCourses)
+      .catch(err => {
+        console.error('Failed to fetch courses:', err);
+      });
   }, []);
+  
 
   return (
     <main className="learning-page">

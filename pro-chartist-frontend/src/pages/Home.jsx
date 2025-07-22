@@ -88,9 +88,9 @@ function Home() {
     // Load saved videos from backend API
     const fetchVideos = async () => {
       try {
-        const res = await fetch('http://localhost:5002/api/videos');
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/videos`);
         const data = await res.json();
-        
+  
         if (data && data.length > 0) {
           setVideos(data);
         }
@@ -100,9 +100,10 @@ function Home() {
         // Keep default videos if API fails
       }
     };
-    
+  
     fetchVideos();
   }, []);
+  
 
 
   const bots = [
