@@ -27,7 +27,7 @@ connectDB();
 // ✅ CORS Middleware (allow Vercel and localhost origins only)
 app.use(cors({
   origin: [
-    'https://pro-chartist-final.vercel.app',
+    'https://pro-chartist-yjn8.vercel.app',
     'http://localhost:5173'
   ],
   credentials: true,
