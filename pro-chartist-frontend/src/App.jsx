@@ -31,7 +31,7 @@ function App() {
   const [leagueData, setLeagueData] = useState({
     currentLeague: {
       traders: [
-        { rank: 1, name: 'John Doe', trades: 156, roi: 85.5 },
+        { rank: 1, name: 'Akshay ', trades: 156, roi: 85.5 },
         { rank: 2, name: 'Jane Smith', trades: 142, roi: 78.3 },
         { rank: 3, name: 'Mike Johnson', trades: 128, roi: 72.1 },
         { rank: 4, name: 'Sarah Williams', trades: 115, roi: 65.8 },

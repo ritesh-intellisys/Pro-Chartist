@@ -7,6 +7,7 @@ const courseSchema = new mongoose.Schema({
   currentPrice: String,
   originalPrice: String,
   imageUrl: String,
+  imagePublicId: String,
 });
 
 module.exports = mongoose.model('Course', courseSchema); 

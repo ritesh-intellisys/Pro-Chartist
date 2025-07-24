@@ -7,6 +7,12 @@ const traderSchema = new mongoose.Schema({
   roi: Number
 });
 
+const topTraderSchema = new mongoose.Schema({
+  date: String,
+  name: String,
+  roi: Number
+});
+
 const leagueSchema = new mongoose.Schema({
   currentLeague: {
     startDate: String,
@@ -17,7 +23,14 @@ const leagueSchema = new mongoose.Schema({
   previousLeague: {
     startDate: String,
     traders: [traderSchema],
-  }
+  },
+  topTraders: [
+    {
+      date: String,
+      name: String,
+      roi: Number
+    }
+  ]
 });
 
 module.exports = mongoose.model('League', leagueSchema);

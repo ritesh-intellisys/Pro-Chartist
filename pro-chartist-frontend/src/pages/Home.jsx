@@ -151,7 +151,7 @@ function Home() {
       role: "Swing Trader",
       rating: 5,
       comment: "I use stock swing bot for swing trading and it gives me best results.Also it helps me to make intraday view",
-      avatar: "https://i.pravatar.cc/150?img=2",
+      avatar: r2,
       image: image2
     },
     {
@@ -160,7 +160,7 @@ function Home() {
       role: "Crypto Trader",
       rating: 4,
       comment: "I used to trade bitcoin and price line bot works best for momentum trading. My all friends use this bot for trading in all crypto",
-      avatar: "https://i.pravatar.cc/150?img=3",
+      avatar: r4,
       image: image3
     },
     {
@@ -169,7 +169,7 @@ function Home() {
       role: "Intraday Trader",
       rating: 5,
       comment: "I am a full time trader I use to trade stock, option, bitcoin and forex. This stock swing bot help me to do intraday analysis and price line bot for quick scalping",
-      avatar: "https://i.pravatar.cc/150?img=2",
+      avatar: r3,
       image: image4
     }
   ];

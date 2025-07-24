@@ -50,7 +50,11 @@ function Learning() {
               <div className="course-image">
                 {course.imageUrl ? (
                   <img
-                    src={`${import.meta.env.VITE_API_URL}${course.imageUrl}`}
+                    src={
+                      course.imageUrl.startsWith('http')
+                        ? course.imageUrl
+                        : `${import.meta.env.VITE_API_URL}${course.imageUrl}`
+                    }
                     alt={course.title}
                     className="course-image"
                   />

@@ -1,14 +1,11 @@
 const express = require('express');
 const multer = require('multer');
+const { imageStorage } = require('../config/cloudinary');
 const ApplicationByDate = require('../models/ApplicationByDate');
 const router = express.Router();
 
 // Multer config for image upload
-const storage = multer.diskStorage({
-  destination: 'uploads/',
-  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
-});
-const upload = multer({ storage });
+const upload = multer({ storage: imageStorage });
 
 // POST - submit application
 router.post('/', upload.single('image'), async (req, res) => {
@@ -81,6 +78,23 @@ router.put('/:appId', async (req, res) => {
   } catch (err) {
     console.error('Update status error:', err);
     res.status(500).json({ error: 'Failed to update application status' });
+  }
+});
+
+// DELETE - remove a specific application by ID and date
+router.delete('/:appId', async (req, res) => {
+  const { appId } = req.params;
+  try {
+    // Find the document containing the application
+    const doc = await ApplicationByDate.findOne({ 'applications._id': appId });
+    if (!doc) return res.status(404).json({ error: 'Application not found' });
+    // Remove the application from the array
+    doc.applications = doc.applications.filter(app => app._id.toString() !== appId);
+    await doc.save();
+    res.json({ message: 'Application deleted' });
+  } catch (err) {
+    console.error('Delete application error:', err);
+    res.status(500).json({ error: 'Failed to delete application' });
   }
 });
 

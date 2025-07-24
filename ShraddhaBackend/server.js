@@ -1,4 +1,5 @@
 // server.js
+console.log('SERVER STARTED!');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -36,19 +37,18 @@ app.use(cors({
 }));
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '200mb' }));
+app.use(express.urlencoded({ limit: '200mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ✅ Multer setup for image uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
+// Log every incoming request
+app.use((req, res, next) => {
+  console.log('Incoming request:', req.method, req.url);
+  next();
 });
-const upload = multer({ storage: storage });
+
+// ✅ Multer setup for image uploads
+// (Removed unused local disk Multer storage)
 
 // ✅ Routes
 app.use('/api/admin', adminRoutes);

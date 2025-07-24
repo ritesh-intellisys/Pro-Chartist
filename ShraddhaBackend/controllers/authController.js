@@ -24,6 +24,7 @@ exports.signup = async (req, res) => {
 
 // ✅ Login
 exports.login = async (req, res) => {
+  console.log('LOGIN ROUTE HIT');
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });

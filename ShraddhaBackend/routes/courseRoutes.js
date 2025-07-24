@@ -2,12 +2,8 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const { getCourses, addCourse, updateCourse, deleteCourse } = require('../controllers/courseController');
-
-const storage = multer.diskStorage({
-  destination: 'uploads/',
-  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
-});
-const upload = multer({ storage });
+const { imageStorage } = require('../config/cloudinary');
+const upload = multer({ storage: imageStorage });
 
 // GET all
 router.get('/', getCourses);

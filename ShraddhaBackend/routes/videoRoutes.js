@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const { storage, videoStorage, imageStorage } = require('../config/cloudinary');
+const videoUpload = multer({ storage: videoStorage, limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB for videos
+const imageUpload = multer({ storage: imageStorage });
 const path = require('path');
-const upload = multer({ dest: path.join(__dirname, '../uploads') });
 const {
   getAllVideos,
   getVideoById,
@@ -12,11 +14,27 @@ const {
   bulkUpdateVideos
 } = require('../controllers/videoController');
 
-// File upload endpoint
-router.post('/upload', upload.single('file'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  // Return the relative URL to the uploaded file
-  res.json({ url: `/uploads/${req.file.filename}` });
+// File upload endpoints
+router.post('/upload/image', (req, res) => {
+  imageUpload.single('file')(req, res, function (err) {
+    if (err) {
+      console.error('Multer/Cloudinary image upload error:', err);
+      return res.status(500).json({ error: err.message || 'Image upload failed' });
+    }
+    if (!req.file) return res.status(400).json({ error: 'No image uploaded.' });
+    res.json({ url: req.file.path });
+  });
+});
+
+router.post('/upload/video', (req, res) => {
+  videoUpload.single('file')(req, res, function (err) {
+    if (err) {
+      console.error('Multer/Cloudinary video upload error:', err);
+      return res.status(500).json({ error: err.message || 'Video upload failed' });
+    }
+    if (!req.file) return res.status(400).json({ error: 'No video uploaded or file too large (max 10MB for videos).' });
+    res.json({ url: req.file.path });
+  });
 });
 
 // Get all videos

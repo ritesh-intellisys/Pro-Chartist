@@ -12,8 +12,17 @@ function ProTraders({ leagueData, setLeagueData, applications, setApplications }
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const MAX_IMAGE_SIZE_MB = 2;
+  const [imagePreview, setImagePreview] = useState(null);
 
   const API_URL = import.meta.env.VITE_API_URL;
+
+  // Helper to get the full backend URL for images (Cloudinary or local)
+  const getImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${API_URL}/${url.replace(/^\/?/, '')}`;
+  };
 
   // ✅ Fetch updated league data on mount
   useEffect(() => {
@@ -30,10 +39,39 @@ function ProTraders({ leagueData, setLeagueData, applications, setApplications }
     fetchLeagueData();
   }, [setLeagueData]);
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setErrors((prev) => ({ ...prev, image: 'Only image files are allowed.' }));
+      setFormData((prev) => ({ ...prev, image: null }));
+      setImagePreview(null);
+      return;
+    }
+    // Validate file size
+    if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
+      setErrors((prev) => ({ ...prev, image: `Image must be less than ${MAX_IMAGE_SIZE_MB}MB.` }));
+      setFormData((prev) => ({ ...prev, image: null }));
+      setImagePreview(null);
+      return;
+    }
+    setFormData((prev) => ({ ...prev, image: file }));
+    setErrors((prev) => ({ ...prev, image: undefined }));
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrors({});
+
+    // Defensive: check for leagueData
+    if (!leagueData?.currentLeague?.nextLeagueStart) {
+      toast.error('League data not loaded. Please try again later.');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       await leagueApplicationSchema.validate(formData, { abortEarly: false });
@@ -55,6 +93,7 @@ function ProTraders({ leagueData, setLeagueData, applications, setApplications }
       setApplications((prev) => [...prev, result.application]);
       toast.success('Application submitted!');
       setFormData({ name: '', mobile: '', image: null });
+      setImagePreview(null);
     } catch (error) {
       if (error.name === 'ValidationError') {
         const newErrors = {};
@@ -185,10 +224,16 @@ function ProTraders({ leagueData, setLeagueData, applications, setApplications }
                   type="file"
                   id="image"
                   accept="image/*"
-                  onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
+                  onChange={handleImageChange}
                   className={errors.image ? 'error' : ''}
+                  disabled={isSubmitting}
                 />
                 {errors.image && <span className="error-message">{errors.image}</span>}
+                {imagePreview && (
+                  <div className="image-preview">
+                    <img src={imagePreview} alt="Preview" style={{ maxWidth: '100%', maxHeight: 150, marginTop: 8 }} />
+                  </div>
+                )}
               </div>
               <button
                 type="submit"

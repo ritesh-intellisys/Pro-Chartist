@@ -31,4 +31,25 @@ router.put('/', async (req, res) => {
   }
 });
 
+// GET topTraders
+router.get('/topTraders', async (req, res) => {
+  try {
+    const league = await League.findOne();
+    res.json(league?.topTraders || []);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch top traders' });
+  }
+});
+
+// PUT topTraders
+router.put('/topTraders', async (req, res) => {
+  try {
+    const { topTraders } = req.body;
+    const league = await League.findOneAndUpdate({}, { topTraders }, { new: true, upsert: true });
+    res.json(league.topTraders);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update top traders' });
+  }
+});
+
 module.exports = router;

@@ -293,9 +293,10 @@ const data = await res.json();
     formData.append('file', file);
     formData.append('type', type);
     formData.append('videoId', videoId);
+    const endpoint = `${API_URL}/api/videos/upload/${type === 'video' ? 'video' : 'image'}`;
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', `${API_URL}/api/videos/upload`, true);
+      xhr.open('POST', endpoint, true);
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
           const progress = (event.loaded / event.total) * 100;
@@ -320,7 +321,12 @@ const data = await res.json();
     });
   };
 
+  const MAX_VIDEO_SIZE_MB = 10;
   const handleVideoUpload = async (videoId, file, type) => {
+    if (type === 'video' && file.size > MAX_VIDEO_SIZE_MB * 1024 * 1024) {
+      toast.error('File too large! Max allowed size is 10MB.');
+      return;
+    }
     try {
       setUploadingVideo({ id: videoId, type });
       setProgressFor(videoId, type, 0);
@@ -333,7 +339,7 @@ const data = await res.json();
       toast.success(`${type === 'video' ? 'Video' : 'Thumbnail'} uploaded successfully!`);
     } catch (error) {
       console.error('Video upload failed:', error);
-      toast.error(`Failed to upload ${type}`);
+      toast.error(`Failed to upload ${type}: ${error.message || ''}`);
     } finally {
       setUploadingVideo(null);
       clearProgressFor(videoId, type);
@@ -841,10 +847,18 @@ const data = await res.json();
                     <td>
                       {app.imageUrl && (
                         <img
-                        src={`${import.meta.env.VITE_API_URL}/${app.imageUrl.replace(/^\/?/, '')}`}
+                        src={
+                          app.imageUrl.startsWith('http')
+                            ? app.imageUrl
+                            : `${import.meta.env.VITE_API_URL}/${app.imageUrl.replace(/^\/?/, '')}`
+                        }
                         alt="Trading Screenshot"
                         onClick={() =>
-                          openImageModal(`${import.meta.env.VITE_API_URL}/${app.imageUrl.replace(/^\/?/, '')}`)
+                          openImageModal(
+                            app.imageUrl.startsWith('http')
+                              ? app.imageUrl
+                              : `${import.meta.env.VITE_API_URL}/${app.imageUrl.replace(/^\/?/, '')}`
+                          )
                         }
                         style={{
                           cursor: 'pointer',
@@ -865,6 +879,30 @@ const data = await res.json();
                         <>
                           <button onClick={() => handleApplicationStatus(app, 'approved')} className="action-btn approve">Approve</button>
                           <button onClick={() => handleApplicationStatus(app, 'rejected')} className="action-btn reject">Reject</button>
+                          <button
+                            onClick={() => {
+                              setConfirm({
+                                open: true,
+                                message: `Are you sure you want to delete application for ${app.name}?`,
+                                onConfirm: async () => {
+                                  closeConfirm();
+                                  try {
+                                    await fetch(`${API_URL}/api/applicationsByDate/${app._id || app.id}`, {
+                                      method: 'DELETE',
+                                    });
+                                    setApplications(prev => prev.filter(a => (a._id || a.id) !== (app._id || app.id)));
+                                    toast.success('Application deleted');
+                                  } catch (err) {
+                                    toast.error('Failed to delete application');
+                                  }
+                                },
+                              });
+                            }}
+                            className="action-btn delete"
+                            style={{ background: '#ef4444', color: 'white' }}
+                          >
+                            Delete
+                          </button>
                         </>
                       )}
                       {applicationFilter === 'accepted' && (
@@ -909,7 +947,11 @@ const data = await res.json();
                 <div style={{ position: 'relative', width: '100%', height: 160, background: '#222' }}>
   {course.imageUrl && (
     <img
-      src={`${import.meta.env.VITE_API_URL}/${course.imageUrl.replace(/^\/?/, '')}`}
+      src={
+        course.imageUrl.startsWith('http')
+          ? course.imageUrl
+          : `${import.meta.env.VITE_API_URL}/${course.imageUrl.replace(/^\/?/, '')}`
+      }
       alt={course.title}
       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
     />
